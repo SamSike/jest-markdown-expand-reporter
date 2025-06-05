@@ -10,7 +10,8 @@
 	"main": "src/mdReporter.js",
 	"scripts": {
 		"test:mutation": "stryker run",
-		"test:unit": "rm -rf .stryker-tmp && jest --coverage"
+		"test:unit": "rm -rf .stryker-tmp && jest --coverage",
+		"test": "jest mdReporter.test.js"
 	},
 	"jest": {
 		"reporters": [

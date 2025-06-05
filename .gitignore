@@ -3,3 +3,4 @@ node_modules/
 .stryker-tmp/
 test-reports/
 coverage/
+reports/
