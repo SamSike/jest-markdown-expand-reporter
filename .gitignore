@@ -1,0 +1,5 @@
+node_modules/
+*-lock.json
+.stryker-tmp/
+test-reports/
+coverage/

@@ -1,10 +1,12 @@
 {
-	"name": "jest-gh-md-reporter",
-	"version": "0.0.2",
-	"description": "A markdown reporter for Jest!",
+	"name": "jest-markdown-expandable-reporter",
+	"version": "0.0.1",
+	"description": "An expandable markdown reporter for Jest tests",
 	"keywords": [],
 	"license": "MIT",
-	"author": "Chris Shepherd",
+	"original-author": "Chris Shepherd",
+	"original-author-url": "https://www.npmjs.com/package/jest-gh-md-reporter",
+	"author": "Sameer Sikka",
 	"main": "src/mdReporter.js",
 	"scripts": {
 		"test:mutation": "stryker run",
@@ -26,13 +28,13 @@
 		]
 	},
 	"dependencies": {
-		"ejs": "^3.1.7"
+		"ejs": "^3.1.10"
 	},
 	"devDependencies": {
-		"@stryker-mutator/core": "^6.0.2",
-		"@stryker-mutator/jest-runner": "^6.0.2",
-		"jest": "^28.0.3",
-		"jest-when": "^3.5.1",
-		"prettier": "^2.6.2"
+		"@stryker-mutator/core": "^9.0.1",
+		"@stryker-mutator/jest-runner": "^9.0.1",
+		"jest": "^29.7.0",
+		"jest-when": "^3.7.0",
+		"prettier": "^3.5.3"
 	}
 }
