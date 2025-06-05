@@ -16,6 +16,7 @@ describe("MdReporter integration", () => {
 	});
 
 	it("should generate a markdown report with correct content for pass, fail, and skip", async () => {
+		// Run Jest as a subprocess, targeting sample.test.js
 		const result = await runCLI(
 			{
 				runInBand: true,
@@ -23,21 +24,26 @@ describe("MdReporter integration", () => {
 				reporters: [
 					"default",
 					[
-						"./src/mdReporter.js",
+						require.resolve("../mdReporter.js"),
 						{
 							filename: "test-report.md",
 							publicPath: "./test-reports",
 						},
 					],
 				],
+				rootDir: process.cwd(),
 			},
 			[process.cwd()]
 		);
+
+		console.log("CLI sample result", result);
 
 		expect(result.results.success).toBe(false); // There is a failing test
 		expect(fs.existsSync(reportPath)).toBe(true);
 
 		const content = fs.readFileSync(reportPath, "utf8");
+		console.log("Generated Report content:", content);
+
 		expect(content).toContain(
 			"# jest-markdown-expandable-reporter Test Results"
 		);
