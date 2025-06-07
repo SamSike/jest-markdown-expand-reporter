@@ -1,0 +1,14 @@
+<%_ const passedSuitesColour = numPassedTestSuites > 0 ? "green" : "lightgrey" _%>
+<%_ const passedTestsColour = numPassedTests > 0 ? "green" : "lightgrey" _%>
+<%_ const failedSuitesColour = numFailedTestSuites > 0 ? "red" : "lightgrey" _%>
+<%_ const failedTestsColour = numFailedTests > 0 ? "red" : "lightgrey" _%>
+<%_ const pendingSuitesColour = numPendingTestSuites > 0 ? "orange" : "lightgrey" _%>
+<%_ const pendingTestsColour = numPendingTests > 0 ? "orange" : "lightgrey" _%>
+
+|Suites (<%= numTotalTestSuites %>)|Tests (<%= numTotalTests %>)|
+|:-:|:-:|
+|![](https://img.shields.io/badge/Passed-<%= numPassedTestSuites %>-<%= passedSuitesColour %>) | ![](https://img.shields.io/badge/Passed-<%= numPassedTests %>-<%= passedTestsColour %>)|
+|![](https://img.shields.io/badge/Failed-<%= numFailedTestSuites %>-<%= failedSuitesColour %>) | ![](https://img.shields.io/badge/Failed-<%= numFailedTests %>-<%= failedTestsColour %>)|
+|![](https://img.shields.io/badge/Pending-<%= numPendingTestSuites %>-<%= pendingSuitesColour %>) | ![](https://img.shields.io/badge/Pending-<%= numPendingTests %>-<%= pendingTestsColour %>)|
+
+---

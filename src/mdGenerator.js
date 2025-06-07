@@ -1,17 +1,17 @@
-const ejs = require("ejs");
+const ejs = require('ejs')
 
 class MDGenerator {
-	static async generate(runResults, date) {
-		const packageName = process.env.npm_package_name;
+  static async generate(runResults, date) {
+    const packageName = process.env.npm_package_name
 
-		const results = await ejs.renderFile(`${__dirname}/reportTemplate.ejs`, {
-			...runResults,
-			date,
-			packageName,
-		});
+    const results = await ejs.renderFile(`${__dirname}/gen.ejs`, {
+      ...runResults,
+      date,
+      packageName,
+    })
 
-		return results;
-	}
+    return results
+  }
 }
 
-module.exports = MDGenerator;
+module.exports = MDGenerator
