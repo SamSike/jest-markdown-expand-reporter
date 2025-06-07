@@ -1,82 +1,55 @@
 # <%= packageName %> Test Results
 
-> **Started**: <%= date.toUTCString() %>
+> **Started**: <%= date.toUTCString(); %>
 
 <center>
-
-  <%- include('summary.ejs') %>
-
   <%_ for(var i=0; i < testResults.length; i++) { _%>
-  <%_ const result=testResults[i]; _%>
+  <%_ const result = testResults[i]; _%>
+  <%_ if (result.numFailingTests > 0 || displayAllTests) { _%>
   <table>
     <thead>
       <tr>
-        <th>File
-        </th>
-        <th>Suite
-        </th>
-        <th>Test
-        </th>
-        <th>Status
-        </th>
-        <th>Time
-          (s)
-        </th>
+        <th><%= result.testFilePath.replace(/^.*[\\\/]/, '') %></th>
+        <th></th>
+        <th></th>
+        <th><%= (result.perfStats.runtime / 1000).toFixed(3) %></th>
       </tr>
     </thead>
     <tbody>
-      <% let testsToShow=[]; if (displayAllTests) { testsToShow=result.testResults; } else {
-                                    testsToShow=result.testResults.filter(t=>
-                                    t.status
-                                    ===
-                                    "failed");
-                                    }
-                                    for (let
-                                    j = 0; j
-                                    < testsToShow.length; j++) { const test=testsToShow[j]; const
-                                        fixture=test.ancestorTitles.join(' / ');
-          const colour = test.status === ' passed' ? 'lightgreen' : test.status==='failed' ? 'pink' : 'lightyellow' ;
-                                        %>
+      <%_ for(var j=0; j < result.testResults.length; j++) { _%>
+      <%_ const test = result.testResults[j]; _%>
+      <!-- Only Show Failed Tests (override with option: displayAllTests) -->
+      <%_ if (test.status === 'failed' || displayAllTests) { _%>
+      <%_ const fixture = test.ancestorTitles.join(' / '); _%>
+      <%_ const colour = test.status === 'passed' ? 'lightgreen' : test.status === 'failed' ? 'pink' : 'lightyellow' _%>
       <tr style="background-color: <%= colour %>; color: black">
-        <td>
-          <%= result.testFilePath.replace(/^.*[\\\/]/, '' ) %>
-        </td>
-        <td><strong>
-            <%= fixture %>
-          </strong>
-        </td>
-        <td><i>
-            <%= test.title %>
-          </i>
-        </td>
-        <td>
-          <%= test.status==="failed" ? "failed" : (displayAllTests ? test.status
-                                                    : "" ) %>
-        </td>
-        <td>
-          <%= (test.duration / 1000).toFixed(3) %>
-        </td>
+        <td><strong><%= fixture %></strong></td>
+        <td><i><%= test.title %></i></td>
+        <td><%= test.status %></td>
+        <td><%= (test.duration / 1000).toFixed(3) %></td>
       </tr>
-      <% if (detailed && test.status==="failed" ) { %>
+      <!-- Show existing console logs for test (option: detailed) -->
+      <%_ if (detailed.length > 0 || (test.consoleLogs && test.consoleLogs.length > 0)) { _%>
       <tr>
-        <td colspan="5">
-          <% if (test.failureMessages && test.failureMessages.length) { %>
-          <pre><%= test.failureMessages.join('\n\n') %></pre>
-          <% } %>
-          <% if (test.consoleLogs && test.consoleLogs.length) { %>
+        <td colspan="4">
           <details>
             <summary>
-              Console
-              Logs
+              Console Logs
             </summary>
-            <pre><%= test.consoleLogs.join('\n') %></pre>
+            <pre>
+              <%_ if (detailed.includes("failure-message") && test.failureMessage) { _%>
+              <%= test.failureMessage %>
+              <%_ } _%>
+              <%= test.consoleLogs && test.consoleLogs.length > 0 ? test.consoleLogs.join('\n') : 'No logs.' %>
+            </pre>
           </details>
-          <% } %>
         </td>
       </tr>
-      <% } %>
-      <% } // end for testsToShow %>
+      <%_ } _%>
+      <%_ } _%>
+      <%_ } _%>
     </tbody>
   </table>
-  <% } %>
+  <%_ } _%>
+  <%_ } _%>
 </center>

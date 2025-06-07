@@ -16,7 +16,27 @@ class LogEnv extends NodeEnvironment {
     this._testLogs = {}
     this._currentTest = null
     this._origConsole = {}
-    this._logFile = path.join(os.tmpdir(), `jest-logs-${process.pid}.json`)
+    this._logFile = path.join(os.tmpdir(), `jest-markdown-expand-logs-${process.pid}.json`)
+
+    // this.enableConsoleCapture()
+  }
+
+  enableConsoleCapture() {
+    const self = this
+    ;['log', 'error', 'warn', 'info', 'debug'].forEach((method) => {
+      // Save the original console method
+      self._origConsole[method] = console[method]
+
+      // Override the console method to capture logs
+      console[method] = function (...args) {
+        if (self._currentTest) {
+          self._testLogs[self._currentTest].push(`[${method}] ${args.join(' ')}`)
+        }
+
+        // Print to the original console
+        self._origConsole[method].apply(console, args)
+      }
+    })
   }
 
   async handleTestEvent(event) {
@@ -30,18 +50,9 @@ class LogEnv extends NodeEnvironment {
     if (event.name === 'test_done') {
       this._currentTest = null
       fs.writeFileSync(this._logFile, JSON.stringify(this._testLogs, null, 2))
-    }
-    if (event.name === 'setup') {
-      const self = this
-      ;['log', 'error', 'warn', 'info'].forEach((method) => {
-        self._origConsole[method] = console[method]
-        console[method] = function (...args) {
-          if (self._currentTest) {
-            self._testLogs[self._currentTest].push(`[${method}] ${args.join(' ')}`)
-          }
-          self._origConsole[method].apply(console, args)
-        }
-      })
+      console.log(
+        `Test logs written to ${this._logFile}: ${JSON.stringify(this._testLogs, null, 2)}`,
+      )
     }
     if (event.name === 'teardown') {
       fs.writeFileSync(this._logFile, JSON.stringify(this._testLogs, null, 2))

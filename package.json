@@ -1,54 +1,58 @@
 {
-	"name": "jest-markdown-expandable-reporter",
-	"version": "0.0.1",
-	"description": "An expandable markdown reporter for Jest tests",
-	"keywords": [],
-	"license": "MIT",
-	"original-author": "Chris Shepherd",
-	"original-author-url": "https://www.npmjs.com/package/jest-gh-md-reporter",
-	"author": "Sameer Sikka",
-	"main": "src/mdReporter.js",
-	"scripts": {
-		"test:mutation": "stryker run",
-		"test:unit": "rm -rf .stryker-tmp && jest --coverage --testPathIgnorePatterns=mdReporter",
-		"test": "jest mdReporter.test.js",
-		"lint": "prettier --write \"src/**/*.js\""
-	},
-	"jest": {
-		"testEnvironment": "./src/logEnv.js",
-		"reporters": [
-			"default",
-			[
-				"./src/mdReporter",
-				{
-					"filename": "test-report.md",
-					"publicPath": "./test-reports"
-				}
-			]
-		],
-		"testMatch": [
-			"**/__tests__/**/*.test.js",
-			"**/__tests__/*.test.js",
-			"**/*.test.js"
-		]
-	},
-	"prettier": {
-		"singleQuote": true,
-		"trailingComma": "all",
-		"printWidth": 100,
-		"tabWidth": 2,
-		"semi": false
-	},
-	"dependencies": {
-		"ejs": "^3.1.10"
-	},
-	"devDependencies": {
-		"@stryker-mutator/core": "^9.0.1",
-		"@stryker-mutator/jest-runner": "^9.0.1",
-		"husky": "^9.1.7",
-		"jest": "^29.7.0",
-		"jest-environment-node": "^30.0.0-beta.3",
-		"jest-when": "^3.7.0",
-		"prettier": "^3.5.3"
-	}
+  "name": "jest-markdown-expandable-reporter",
+  "version": "0.0.1",
+  "description": "An expandable markdown reporter for Jest tests",
+  "keywords": [],
+  "license": "MIT",
+  "original-author": "Chris Shepherd",
+  "original-author-url": "https://www.npmjs.com/package/jest-gh-md-reporter",
+  "author": "Sameer Sikka",
+  "main": "src/mdReporter.js",
+  "scripts": {
+    "test:mutation": "stryker run",
+    "test:unit": "rm -rf .stryker-tmp && jest --coverage --testPathIgnorePatterns=mdReporter",
+    "test": "jest mdReporter.test.js",
+    "lint": "prettier --write \"src/**/*.js\""
+  },
+  "jest": {
+    "verbose": false,
+    "reporters": [
+      "default",
+      [
+        "./src/new.js",
+        {
+          "filename": "test-report.md",
+          "publicPath": "./test-reports",
+          "displayAllTests": true,
+          "detailed": [
+            "failure-message"
+          ]
+        }
+      ]
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.test.js",
+      "**/__tests__/*.test.js",
+      "**/*.test.js"
+    ]
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "printWidth": 100,
+    "tabWidth": 2,
+    "semi": false
+  },
+  "dependencies": {
+    "ejs": "^3.1.10"
+  },
+  "devDependencies": {
+    "@stryker-mutator/core": "^9.0.1",
+    "@stryker-mutator/jest-runner": "^9.0.1",
+    "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "jest-environment-node": "^30.0.0-beta.3",
+    "jest-when": "^3.7.0",
+    "prettier": "^3.5.3"
+  }
 }

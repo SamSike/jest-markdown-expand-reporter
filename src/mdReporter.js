@@ -6,30 +6,52 @@ const MDGenerator = require('./mdGenerator')
 class MDReporter {
   filename
   publicPath
-  detailed = false
+  detailed = [] // "failure-message", "debug", "error", "info", "log", "warn", "all"
   displayAllTests = false
+  intermediateResults = false
 
   globalConfig
   reporterContext
 
   constructor(globalConfig, reporterOptions, reporterContext) {
+    // Remove old log files
+    const oldLogFiles = this.getExistingTempFiles()
+    for (const file of oldLogFiles) {
+      try {
+        fs.unlinkSync(file)
+      } catch {}
+    }
+
     this.globalConfig = globalConfig
-    const { filename, publicPath, detailed, displayAllTests } = reporterOptions ?? {}
+    const { filename, publicPath, detailed, displayAllTests, intermediateResults } =
+      reporterOptions ?? {}
     this.filename = filename ?? 'test-results.md'
     this.publicPath = publicPath ?? './'
-    this.detailed = detailed ?? false
+    this.detailed = detailed ?? []
     this.displayAllTests = displayAllTests ?? false
+    this.intermediateResults = intermediateResults ?? false
     this.reporterContext = reporterContext
 
+    this.startTime = new Date()
     this.successCount = 0
     this.failCount = 0
     this.skipCount = 0
     this.allTestResults = []
+  }
 
-    // console.log(`Global Config: ${JSON.stringify(globalConfig, null, 2)}`);
-    // console.log(
-    //   `Reporter Context: ${JSON.stringify(reporterContext, null, 2)}`,
-    // );
+  getOptions() {
+    return {
+      detailed: this.detailed,
+      displayAllTests: this.displayAllTests,
+    }
+  }
+
+  getExistingTempFiles() {
+    const tmpDir = os.tmpdir()
+    return fs
+      .readdirSync(tmpDir)
+      .filter((f) => f.startsWith('jest-markdown-expand-logs-') && f.endsWith('.json'))
+      .map((f) => path.join(tmpDir, f))
   }
 
   /**
@@ -39,6 +61,9 @@ class MDReporter {
    * This allows the markdown file to be updated incrementally as suites finish.
    */
   async onTestResult(test, testResult, aggregatedResult) {
+    // If intermediate results are disabled, skip this step
+    if (!this.intermediateResults) return
+
     // Track test counts
     for (const t of testResult.testResults) {
       if (t.status === 'passed') this.successCount++
@@ -76,12 +101,11 @@ class MDReporter {
       numTotalTests: this.allTestResults.length,
       testResults: aggregatedResult.testResults,
       allTestResults: this.allTestResults,
-      detailed: this.detailed,
-      displayAllTests: this.displayAllTests,
+      ...this.getOptions(),
     }
 
     try {
-      const report = await MDGenerator.generate(aggregateRunResults, new Date())
+      const report = await MDGenerator.generate(aggregateRunResults, this.startTime)
       if (!fs.existsSync(this.publicPath)) fs.mkdirSync(this.publicPath, { recursive: true })
       const filename = `${this.publicPath}/${this.filename}`
       fs.writeFileSync(filename, report)
@@ -97,51 +121,45 @@ class MDReporter {
    * attaches logs to test results, and generates the final markdown report
    * using the EJS template via MDGenerator.
    */
-  // async onRunComplete(textContexts, runResults) {
-  // 	const tmpDir = os.tmpdir();
+  async onRunComplete(textContexts, runResults) {
+    // Re-scan for log files created during this run
+    const newLogFiles = getExistingTempFiles()
 
-  // 	// Remove old log files
-  // 	const oldLogFiles = fs
-  // 		.readdirSync(tmpDir)
-  // 		.filter((f) => f.startsWith("jest-logs-") && f.endsWith(".json"))
-  // 		.map((f) => path.join(tmpDir, f));
-  // 	for (const file of oldLogFiles) {
-  // 		try {
-  // 			fs.unlinkSync(file);
-  // 		} catch {}
-  // 	}
+    // Merge logs from all files
+    const allLogs = {}
+    for (const file of newLogFiles) {
+      try {
+        const logs = JSON.parse(fs.readFileSync(file, 'utf8'))
+        Object.assign(allLogs, logs)
+        fs.unlinkSync(file) // Clean up after reading
+      } catch {}
+    }
 
-  // 	// Re-scan for log files created during this run
-  // 	const newLogFiles = fs
-  // 		.readdirSync(tmpDir)
-  // 		.filter((f) => f.startsWith("jest-logs-") && f.endsWith(".json"))
-  // 		.map((f) => path.join(tmpDir, f));
+    // console.log(`All logs: ${JSON.stringify(allLogs, null, 2)}`)
 
-  // 	// Merge logs from all files
-  // 	const allLogs = {};
-  // 	for (const file of newLogFiles) {
-  // 		try {
-  // 			const logs = JSON.parse(fs.readFileSync(file, "utf8"));
-  // 			Object.assign(allLogs, logs);
-  // 			fs.unlinkSync(file); // Clean up after reading
-  // 		} catch {}
-  // 	}
+    // Attach logs to test results
+    for (const suite of runResults.testResults) {
+      for (const test of suite.testResults) {
+        if (allLogs[test.title]) {
+          test.consoleLogs = allLogs[test.title]
+          // console.log(`Attached logs for test: ${test.title}: ${test.consoleLogs.length} logs`)
+        }
+      }
+    }
 
-  // 	// Attach logs to test results
-  // 	for (const suite of runResults.testResults) {
-  // 		for (const test of suite.testResults) {
-  // 			if (allLogs[test.title]) {
-  // 				test.consoleLogs = allLogs[test.title];
-  // 			}
-  // 		}
-  // 	}
+    const allResults = {
+      ...runResults,
+      ...this.getOptions(),
+    }
 
-  // 	const report = await MDGenerator.generate(runResults, new Date());
-  // 	if (!fs.existsSync(this.publicPath)) fs.mkdirSync(this.publicPath);
-  // 	const filename = `${this.publicPath}/${this.filename}`;
-  // 	if (fs.existsSync(filename)) fs.rmSync(filename);
-  // 	fs.writeFileSync(filename, report);
-  // }
+    // console.log(`Merged logs: ${JSON.stringify(allResults, null, 2)}`)
+
+    const report = await MDGenerator.generate(allResults, new Date())
+    if (!fs.existsSync(this.publicPath)) fs.mkdirSync(this.publicPath)
+    const filename = `${this.publicPath}/${this.filename}`
+    if (fs.existsSync(filename)) fs.rmSync(filename)
+    fs.writeFileSync(filename, report)
+  }
 }
 
 module.exports = MDReporter
