@@ -1,7 +1,5 @@
 # jest-markdown-expand-reporter
-# jest-markdown-expand-reporter
 
-A markdown reporter for Jest tests with expandable sections containing per test console logs
 A markdown reporter for Jest tests with expandable sections containing per test console logs
 
 ## Configuration
@@ -26,27 +24,11 @@ or
 
 ```bash
 yarn add jest-markdown-expand-reporter
-yarn add jest-markdown-expand-reporter
 ```
 
 Update jest.config.js or package.json as follows:
-Update jest.config.js or package.json as follows:
 
 ```json
- "jest": {
-  "setupFilesAfterEnv": ["jest-markdown-expand-reporter/dist/patchConsole.js"], // To capture console logs in the output
-	"reporters": [
-		[
-			"jest-markdown-expand-reporter",
-			{
-				"filename": "test-report.md",
-				"publicPath": "./test-reports",
-				"displayAllTests": true,
-				"consoleLogs": ["all"],
-			},
-		],
-	],
- },
  "jest": {
   "setupFilesAfterEnv": ["jest-markdown-expand-reporter/dist/patchConsole.js"], // To capture console logs in the output
 	"reporters": [
@@ -65,5 +47,4 @@ Update jest.config.js or package.json as follows:
 
 ## Contribution
 
-Reach out to me for contribution or to request updates :)
 Reach out to me for contribution or to request updates :)
