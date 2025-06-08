@@ -6,6 +6,7 @@ describe('Sample', () => {
 
   it('should fail', () => {
     console.log('This should fail');
+    console.debug('This should fail');
     expect(1 + 1).toBe(3);
   });
 

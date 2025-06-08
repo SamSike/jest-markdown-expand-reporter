@@ -24,6 +24,12 @@ interface ReporterOptions {
   failureMessages?: boolean;
 }
 
+interface LogSyntax {
+  type: LogOptions;
+  message: string;
+  origin: string;
+}
+
 class MDReporter {
   globalConfig: Config.GlobalConfig;
   options: ReporterOptions;
@@ -71,7 +77,7 @@ class MDReporter {
         ? path.basename(suite.testFilePath, path.extname(suite.testFilePath))
         : 'unknown-suite';
       const logFile = path.join(tmpDir, `jest-md-logs-${suiteFile}.json`);
-      let suiteLogs: Record<string, string[]> = {};
+      let suiteLogs: Record<string, LogSyntax[]> = {};
       if (fs.existsSync(logFile)) {
         try {
           suiteLogs = JSON.parse(fs.readFileSync(logFile, 'utf-8'));
@@ -88,12 +94,14 @@ class MDReporter {
         // Only include logs if enabled in options
         if (
           enabledLogTypes.includes('all') ||
-          enabledLogTypes.some((type) => logs.some((log) => log.startsWith(`[${type}]`)))
+          enabledLogTypes.some((type) =>
+            logs.some((log) => (log.type || '').toLowerCase() === type),
+          )
         ) {
           // If not 'all', filter logs by enabled types
           if (!enabledLogTypes.includes('all')) {
             logs = logs.filter((log) =>
-              enabledLogTypes.some((type) => log.startsWith(`[${type}]`)),
+              enabledLogTypes.some((type) => (log.type || '').toLowerCase() === type),
             );
           }
           (test as any).consoleLogs = logs;
@@ -109,10 +117,20 @@ class MDReporter {
       date: this.startTime,
       testResults: runResults.testResults,
       ...this.getOptions(),
+      // Add these summary fields:
+      numPassedTestSuites: runResults.numPassedTestSuites,
+      numFailedTestSuites: runResults.numFailedTestSuites,
+      numPendingTestSuites: runResults.numPendingTestSuites,
+      numTotalTestSuites: runResults.numTotalTestSuites,
+      numPassedTests: runResults.numPassedTests,
+      numFailedTests: runResults.numFailedTests,
+      numPendingTests: runResults.numPendingTests,
+      numTotalTests: runResults.numTotalTests,
     };
 
     // Generate the markdown report using gen.ejs
     try {
+      fs.writeFileSync('output.json', JSON.stringify(data, null, 2));
       const report = await (MDGenerator as any).generate(data, data.date);
       if (!fs.existsSync(this.publicPath)) fs.mkdirSync(this.publicPath, { recursive: true });
       const filename = path.join(this.publicPath, this.filename);

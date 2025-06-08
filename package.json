@@ -9,9 +9,9 @@
   "author": "Sameer Sikka",
   "main": "src/mdReporter.js",
   "scripts": {
-    "build": "tsc && cp src/reportTemplate.ejs dist/reportTemplate.ejs",
+    "build": "tsc && cp src/*.ejs dist/",
     "test:mutation": "yarn build && stryker run",
-    "test:unit": "yarn build && rm -rf .stryker-tmp && jest --coverage --testPathIgnorePatterns=mdReporter",
+    "test:unit": "jest --clearCache && yarn build && rm -rf .stryker-tmp && jest --coverage --testPathIgnorePatterns=mdReporter",
     "test": "yarn build && jest mdReporter.test.js",
     "lint": "prettier --write \"src/**/*.js\""
   },

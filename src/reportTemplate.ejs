@@ -3,6 +3,8 @@
 > **Started**: <%= date.toUTCString(); %>
 
 <center>
+  <%- include('summary.ejs') %>
+
   <%_ for(var i=0; i < testResults.length; i++) { _%>
   <%_ const result = testResults[i]; _%>
   <%_ if (result.numFailingTests > 0 || displayAllTests) { _%>
@@ -18,7 +20,6 @@
     <tbody>
       <%_ for(var j=0; j < result.testResults.length; j++) { _%>
       <%_ const test = result.testResults[j]; _%>
-      <!-- Only Show Failed Tests (override with option: displayAllTests) -->
       <%_ if (test.status === 'failed' || displayAllTests) { _%>
       <%_ const fixture = test.ancestorTitles.join(' / '); _%>
       <%_ const colour = test.status === 'passed' ? 'lightgreen' : test.status === 'failed' ? 'pink' : 'lightyellow' _%>
@@ -28,7 +29,6 @@
         <td><%= test.status %></td>
         <td><%= (test.duration / 1000).toFixed(3) %></td>
       </tr>
-      <!-- Show Console Logs or FailureMessages (override with option: consoleLogs, failureMessages) -->
       <%_ const displayLogs = (typeof consoleLogs !== 'undefined') && consoleLogs.length > 0 && (test.consoleLogs && test.consoleLogs.length > 0); _%>
       <%_ const displayFailureMessages = (typeof failureMessages !== 'undefined') && failureMessages && test.failureMessages && test.failureMessages.length > 0; _%>
       <%_ if (displayLogs || displayFailureMessages) { _%>
@@ -37,12 +37,7 @@
         <td colspan="4">
           <details>
             <summary>Console Logs</summary>
-            <pre>
-                <!-- consoleLogs -->
-                <%_ if (displayLogs && (test.consoleLogs && test.consoleLogs.length > 0)) { _%>
-                <%= JSON.stringify(test.consoleLogs, null, 2) %>
-                <%_ } _%>
-              </pre>
+            <pre><%_ if (displayLogs && (test.consoleLogs && test.consoleLogs.length > 0)) { _%><%- include('logs.ejs', {logs: test.consoleLogs}) %><%_ } _%></pre>
           </details>
         </td>
       </tr>
@@ -52,12 +47,16 @@
         <td colspan="4">
           <details>
             <summary>Failure Messages</summary>
-            <pre>
-                <!-- failureMessages -->
-                <%_ if (failureMessages && test.failureMessages && test.failureMessages.length > 0) { _%>
-                <%= test.failureMessages %>
-                <%_ } _%>
-              </pre>
+            <pre><%= test.failureMessages
+                  .map(msg =>
+                    msg
+                      .replace(/\u001b\[[0-9;]*m/g, '') // Remove ANSI color codes
+                      .split('\n')
+                      .map(line => line.trimStart())    // Remove leading spaces from every line
+                      .join('\n')
+                      .trimStart()
+                  )
+                  .join('\n\n') %></pre>
           </details>
         </td>
       </tr>
