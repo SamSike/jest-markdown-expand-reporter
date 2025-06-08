@@ -29,7 +29,7 @@
         <td><%= (test.duration / 1000).toFixed(3) %></td>
       </tr>
       <!-- Show existing console logs for test (option: detailed) -->
-      <%_ if (detailed.length > 0 || (test.consoleLogs && test.consoleLogs.length > 0)) { _%>
+      <%_ if (detailed.length > 0 && (test.consoleLogs && test.consoleLogs.length > 0)) { _%>
       <tr>
         <td colspan="4">
           <details>
