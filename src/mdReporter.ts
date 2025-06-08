@@ -135,7 +135,7 @@ class MDReporter {
       if (!fs.existsSync(this.publicPath)) fs.mkdirSync(this.publicPath, { recursive: true });
       const filename = path.join(this.publicPath, this.filename);
       fs.writeFileSync(filename, report);
-      process.stdout.write(`Markdown report generated at: ${filename}\n`);
+      // process.stdout.write(`Markdown report generated at: ${filename}\n`);
     } catch (err) {
       process.stderr.write(`Markdown report generation failed: ${JSON.stringify(err, null, 2)}\n`);
       process.exitCode = 1;

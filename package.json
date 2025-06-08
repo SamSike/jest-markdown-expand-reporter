@@ -1,41 +1,42 @@
 {
-	"name": "jest-markdown-expandable-reporter",
-	"version": "0.0.1",
-	"description": "An expandable markdown reporter for Jest tests",
-	"keywords": [],
-	"license": "MIT",
-	"original-author": "Chris Shepherd",
-	"original-author-url": "https://www.npmjs.com/package/jest-gh-md-reporter",
-	"author": "Sameer Sikka",
-	"main": "src/mdReporter.js",
-	"scripts": {
-		"build": "tsc && cp src/*.ejs dist/",
-		"test:mutation": "yarn build && stryker run",
-		"test:unit": "jest --clearCache && yarn build && rm -rf .stryker-tmp && jest --coverage --testPathIgnorePatterns=mdReporter",
-		"test": "yarn build && jest mdReporter.test.js",
-		"lint": "prettier --write \"src/**/*.ts\" \"**/*.md\""
-	},
-	"prettier": {
-		"singleQuote": true,
-		"trailingComma": "all",
-		"printWidth": 100,
-		"tabWidth": 2,
-		"useTabs": false
-	},
-	"dependencies": {
-		"ejs": "^3.1.10"
-	},
-	"devDependencies": {
-		"@stryker-mutator/core": "^9.0.1",
-		"@stryker-mutator/jest-runner": "^9.0.1",
-		"@types/ejs": "^3.1.5",
-		"@types/jest": "^29.5.14",
-		"husky": "^9.1.7",
-		"jest": "^29.7.0",
-		"jest-environment-node": "^30.0.0-beta.3",
-		"jest-when": "^3.7.0",
-		"prettier": "^3.5.3",
-		"ts-jest": "^29.3.4",
-		"typescript": "^5.8.3"
-	}
+  "name": "jest-markdown-expand-reporter",
+  "version": "0.0.1",
+  "description": "A markdown reporter for Jest tests with expandable sections containing per test console logs",
+  "keywords": [],
+  "license": "MIT",
+  "original-author": "Chris Shepherd",
+  "original-author-url": "https://www.npmjs.com/package/jest-gh-md-reporter",
+  "author": "Sameer Sikka",
+  "main": "dist/mdReporter.js",
+  "scripts": {
+    "build": "tsc && cp src/*.ejs dist/",
+    "update": "rm -rf dist && rm *.tgz && yarn build && yarn unlink && yarn pack && yarn link",
+    "test:mutation": "yarn build && stryker run",
+    "test:unit": "jest --clearCache && yarn build && rm -rf .stryker-tmp && jest --coverage --testPathIgnorePatterns=mdReporter",
+    "test": "yarn build && jest mdReporter.test.js",
+    "lint": "prettier --write \"src/**/*.ts\" \"**/*.md\""
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "printWidth": 100,
+    "tabWidth": 2,
+    "useTabs": false
+  },
+  "dependencies": {
+    "ejs": "^3.1.10"
+  },
+  "devDependencies": {
+    "@stryker-mutator/core": "^9.0.1",
+    "@stryker-mutator/jest-runner": "^9.0.1",
+    "@types/ejs": "^3.1.5",
+    "@types/jest": "^29.5.14",
+    "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "jest-environment-node": "^30.0.0-beta.3",
+    "jest-when": "^3.7.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.3.4",
+    "typescript": "^5.8.3"
+  }
 }

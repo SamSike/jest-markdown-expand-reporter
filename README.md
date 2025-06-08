@@ -1,6 +1,6 @@
 # jest-markdown-expand-reporter
 
-This package outputs test results to a visually appealing markdown file.
+A markdown reporter for Jest tests with expandable sections containing per test console logs
 
 ## Configuration
 
