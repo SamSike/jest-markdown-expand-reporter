@@ -3,45 +3,69 @@
 > **Started**: <%= date.toUTCString(); %>
 
 <center>
-<%_ const passedSuitesColour = numPassedTestSuites > 0 ? "green" : "lightgrey" _%>
-<%_ const passedTestsColour = numPassedTests > 0 ? "green" : "lightgrey" _%>
-<%_ const failedSuitesColour = numFailedTestSuites > 0 ? "red" : "lightgrey" _%>
-<%_ const failedTestsColour = numFailedTests > 0 ? "red" : "lightgrey" _%>
-<%_ const pendingSuitesColour = numPendingTestSuites > 0 ? "orange" : "lightgrey" _%>
-<%_ const pendingTestsColour = numPendingTests > 0 ? "orange" : "lightgrey" _%>
+  <%- include('summary.ejs') %>
 
-|Suites (<%= numTotalTestSuites %>)|Tests (<%= numTotalTests %>)|
-|:-:|:-:|
-|![](https://img.shields.io/badge/Passed-<%= numPassedTestSuites %>-<%= passedSuitesColour %>) | ![](https://img.shields.io/badge/Passed-<%= numPassedTests %>-<%= passedTestsColour %>)|
-|![](https://img.shields.io/badge/Failed-<%= numFailedTestSuites %>-<%= failedSuitesColour %>) | ![](https://img.shields.io/badge/Failed-<%= numFailedTests %>-<%= failedTestsColour %>)|
-|![](https://img.shields.io/badge/Pending-<%= numPendingTestSuites %>-<%= pendingSuitesColour %>) | ![](https://img.shields.io/badge/Pending-<%= numPendingTests %>-<%= pendingTestsColour %>)|
-
----
-
-<%_ for(var i=0; i < testResults.length; i++) { _%>
-    <%_ const result = testResults[i]; _%>
-<table>
-<thead>
-<tr>
-<th><%= result.testFilePath.replace(/^.*[\\\/]/, '') %></th>
-<th></th>
-<th></th>
-<th><%= result.perfStats.runtime / 1000 %></th>
-</tr>
-</thead>
-<tbody>
-<%_ for(var j=0; j < result.testResults.length; j++) { _%>
-    <%_ const test = result.testResults[j]; _%>
-    <%_ const fixture = test.ancestorTitles.join(' / '); _%>
-    <%_ const colour = test.status === 'passed' ? 'lightgreen' : test.status === 'failed' ? 'pink' : 'lightyellow' _%>
-<tr style="background-color: <%= colour %>; color: black">
-<td><strong><%= fixture %></strong></td>
-<td><i><%= test.title %></i></td>
-<td><%= test.status %></td>
-<td><%= test.duration / 1000 %></td>
-</tr>
-<%_ } _%>
-</tbody>
-</table>
-<%_ } _%>
+  <%_ for(var i=0; i < testResults.length; i++) { _%>
+  <%_ const result = testResults[i]; _%>
+  <%_ if (result.numFailingTests > 0 || displayAllTests) { _%>
+  <table>
+    <thead>
+      <tr>
+        <th><%= result.testFilePath.replace(/^.*[\\\/]/, '') %></th>
+        <th></th>
+        <th></th>
+        <th><%= (result.perfStats.runtime / 1000).toFixed(3) %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <%_ for(var j=0; j < result.testResults.length; j++) { _%>
+      <%_ const test = result.testResults[j]; _%>
+      <%_ if (test.status === 'failed' || displayAllTests) { _%>
+      <%_ const fixture = test.ancestorTitles.join(' / '); _%>
+      <%_ const colour = test.status === 'passed' ? 'lightgreen' : test.status === 'failed' ? 'pink' : 'lightyellow' _%>
+      <tr style="background-color: <%= colour %>; color: black">
+        <td><strong><%= fixture %></strong></td>
+        <td><i><%= test.title %></i></td>
+        <td><%= test.status %></td>
+        <td><%= (test.duration / 1000).toFixed(3) %></td>
+      </tr>
+      <%_ const displayLogs = (typeof consoleLogs !== 'undefined') && consoleLogs.length > 0 && (test.consoleLogs && test.consoleLogs.length > 0); _%>
+      <%_ const displayFailureMessages = (typeof failureMessages !== 'undefined') && failureMessages && test.failureMessages && test.failureMessages.length > 0; _%>
+      <%_ if (displayLogs || displayFailureMessages) { _%>
+      <%_ if (displayLogs) { _%>
+      <tr>
+        <td colspan="4">
+          <details>
+            <summary>Console Logs</summary>
+            <pre><%_ if (displayLogs && (test.consoleLogs && test.consoleLogs.length > 0)) { _%><%- include('logs.ejs', {logs: test.consoleLogs}) %><%_ } _%></pre>
+          </details>
+        </td>
+      </tr>
+      <%_ } _%>
+      <%_ if (displayFailureMessages) { _%>
+      <tr>
+        <td colspan="4">
+          <details>
+            <summary>Failure Messages</summary>
+            <pre><%= test.failureMessages
+                  .map(msg =>
+                    msg
+                      .replace(/\u001b\[[0-9;]*m/g, '') // Remove ANSI color codes
+                      .split('\n')
+                      .map(line => line.trimStart())    // Remove leading spaces from every line
+                      .join('\n')
+                      .trimStart()
+                  )
+                  .join('\n\n') %></pre>
+          </details>
+        </td>
+      </tr>
+      <%_ } _%>
+      <%_ } _%>
+      <%_ } _%>
+      <%_ } _%>
+    </tbody>
+  </table>
+  <%_ } _%>
+  <%_ } _%>
 </center>

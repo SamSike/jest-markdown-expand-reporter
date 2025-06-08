@@ -1,6 +1,11 @@
 node_modules/
 *-lock.json
+yarn.lock
+dist/
 .stryker-tmp/
 test-reports/
 coverage/
 reports/
+
+# Release files
+*.tgz
