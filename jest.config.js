@@ -1,19 +1,17 @@
 module.exports = {
   preset: 'ts-jest',
-  testEnvironment: './dist/logEnv.js',
-  testEnvironmentOptions: {
-    console: 'inherit',
-  },
+  setupFilesAfterEnv: ['./src/patchConsole.ts'],
+  testEnvironment: 'node',
   testMatch: ['**/__tests__/**/*.test.ts', '**/*.test.ts'],
   reporters: [
-    'default',
+    // 'default',
     [
-      './dist/new.js',
+      './dist/mdReporter.js',
       {
         filename: 'test-report.md',
         publicPath: './test-reports',
         displayAllTests: true,
-        detailed: ['failure-message', 'all'],
+        consoleLogs: ['all'],
       },
     ],
   ],

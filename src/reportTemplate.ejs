@@ -28,19 +28,23 @@
         <td><%= test.status %></td>
         <td><%= (test.duration / 1000).toFixed(3) %></td>
       </tr>
-      <!-- Show existing console logs for test (option: detailed) -->
-      <%_ if (detailed.length > 0 && (test.consoleLogs && test.consoleLogs.length > 0)) { _%>
+      <!-- Show Console Logs or FailureMessages (override with option: consoleLogs, failureMessages) -->
+      <%_ const displayLogs = (typeof consoleLogs !== 'undefined') && consoleLogs.length > 0 && (test.consoleLogs && test.consoleLogs.length > 0); _%>
+      <%_ const displayFailureMessages = (typeof failureMessages !== 'undefined') && failureMessages && test.failureMessages && test.failureMessages.length > 0; _%>
+      <%_ if (displayLogs || displayFailureMessages) { _%>
       <tr>
         <td colspan="4">
           <details>
-            <summary>
-              Console Logs
-            </summary>
+            <summary>Console Logs</summary>
             <pre>
-              <%_ if (detailed.includes("failure-message") && test.failureMessage) { _%>
-              <%= test.failureMessage %>
+              <!-- consoleLogs -->
+              <%_ if (displayLogs && (test.consoleLogs && test.consoleLogs.length > 0)) { _%>
+              <%= JSON.stringify(test.consoleLogs, null, 2) %>
               <%_ } _%>
-              <%= test.consoleLogs && test.consoleLogs.length > 0 ? test.consoleLogs.join('\n') : 'No logs.' %>
+              <!-- failureMessages -->
+              <%_ if (failureMessages && test.failureMessages && test.failureMessages.length > 0) { _%>
+              <%= test.failureMessages %>
+              <%_ } _%>
             </pre>
           </details>
         </td>

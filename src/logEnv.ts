@@ -24,8 +24,9 @@ class LogEnv extends NodeEnvironment {
   enableConsoleCapture() {
     consoleMethods.forEach((method: ConsoleMethod) => {
       this._origConsole[method] = console[method];
-      (console as any)[method] = (...args: any[]) => {
-        process.stdout.write(`[DEBUG] Patched console.${method}\n`);
+      process.stdout.write(`[DEBUG] Patching global console.${method}\n`);
+      const patch = (...args: any[]) => {
+        process.stdout.write(`[DEBUG] Patched global console.${method}\n`);
         if (this._currentTest) {
           if (!this._testLogs[this._currentTest]) return;
           this._testLogs[this._currentTest].logs.push(`[${method}] ${args.join(' ')}`);
@@ -35,6 +36,8 @@ class LogEnv extends NodeEnvironment {
           orig.apply(console, args);
         }
       };
+      globalThis.console[method] = patch;
+      console[method] = patch;
     });
   }
 
@@ -66,6 +69,7 @@ class LogEnv extends NodeEnvironment {
       this.writeLogsOnce();
       consoleMethods.forEach((method: ConsoleMethod) => {
         const orig = this._origConsole[method];
+        process.stdout.write(`[DEBUG] Patched console.${method}\n`);
         if (orig) {
           (console as any)[method] = orig;
         }

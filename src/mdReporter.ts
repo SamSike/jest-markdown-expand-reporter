@@ -7,8 +7,6 @@ import type { ConsoleBuffer } from '@jest/console';
 import type { Config } from '@jest/types';
 
 enum LogOptions {
-  // Display failure messages in the report
-  FAILURE_MESSAGE = 'failureMessage',
   // Display console logs in the report
   ALL_LOGS = 'all',
   DEBUG = 'debug',
@@ -21,18 +19,21 @@ enum LogOptions {
 interface ReporterOptions {
   filename?: string;
   publicPath?: string;
-  detailed?: LogOptions[];
+  consoleLogs?: LogOptions[];
   displayAllTests?: boolean;
+  failureMessages?: boolean;
 }
 
 class MDReporter {
   globalConfig: Config.GlobalConfig;
   options: ReporterOptions;
+  startTime: Date;
 
   filename: string;
   publicPath: string;
-  detailed: string[];
+  consoleLogs: string[];
   displayAllTests: boolean = false;
+  failureMessages: boolean = true;
 
   logs: Record<string, ConsoleBuffer> = {};
 
@@ -41,15 +42,18 @@ class MDReporter {
     this.options = reporterOptions || {};
     this.filename = this.options.filename || 'test-results.md';
     this.publicPath = this.options.publicPath || './';
-    this.detailed = this.options.detailed || [];
+    this.consoleLogs = this.options.consoleLogs || [];
     this.displayAllTests = this.options.displayAllTests || false;
+    this.failureMessages = this.options.failureMessages || true;
+    this.startTime = new Date();
     this.logs = {};
   }
 
   getOptions() {
     return {
-      detailed: this.detailed,
+      consoleLogs: this.consoleLogs,
       displayAllTests: this.displayAllTests,
+      failureMessages: this.failureMessages,
     };
   }
 
@@ -58,48 +62,64 @@ class MDReporter {
   }
 
   async onRunComplete(contexts: Set<unknown>, runResults: AggregatedResult) {
-    // Merge all log files from all workers
     const tmpDir = os.tmpdir();
-    const logFiles = fs
-      .readdirSync(tmpDir)
-      .filter((f) => f.startsWith('jest-md-logs-') && f.endsWith('.json'));
-    let allLogs: Record<string, { logs: string[]; testFilePath: string; testName: string }> = {};
+    const enabledLogTypes = (this.consoleLogs || []).map((type) => type.toLowerCase());
 
-    for (const file of logFiles) {
-      try {
-        const fileLogs = JSON.parse(fs.readFileSync(path.join(tmpDir, file), 'utf-8'));
-        allLogs = { ...allLogs, ...fileLogs };
-      } catch (e) {
-        process.stderr.write(`Could not parse log file ${file}: ${e}\n`);
-      }
-    }
-
-    // Attach logs to each test result
+    // For each test suite, read its corresponding log file
     for (const suite of runResults.testResults as TestResult[]) {
+      const suiteFile = suite.testFilePath
+        ? path.basename(suite.testFilePath, path.extname(suite.testFilePath))
+        : 'unknown-suite';
+      const logFile = path.join(tmpDir, `jest-md-logs-${suiteFile}.json`);
+      let suiteLogs: Record<string, string[]> = {};
+      if (fs.existsSync(logFile)) {
+        try {
+          suiteLogs = JSON.parse(fs.readFileSync(logFile, 'utf-8'));
+        } catch (e) {
+          process.stderr.write(`Could not parse log file ${logFile}: ${e}\n`);
+        }
+      }
+
+      // Attach logs to each test in the suite, filtering by enabled log types
       for (const test of suite.testResults as AssertionResult[]) {
-        const logEntry = Object.values(allLogs).find(
-          (entry) =>
-            entry.testFilePath === suite.testFilePath &&
-            entry.testName === (test.fullName || test.title),
-        );
-        (test as any).consoleLogs = logEntry || {
-          logs: [],
-          testFilePath: suite.testFilePath,
-          testName: test.fullName || test.title,
-        };
+        const testName = test.fullName || test.title;
+        let logs = suiteLogs[testName] || [];
+
+        // Only include logs if enabled in options
+        if (
+          enabledLogTypes.includes('all') ||
+          enabledLogTypes.some((type) => logs.some((log) => log.startsWith(`[${type}]`)))
+        ) {
+          // process.stdout.write(
+          //   `[DEBUG] Attaching logs for test: ${testName} from suite: ${suiteFile}\n`,
+          // );
+          // If not 'all', filter logs by enabled types
+          if (!enabledLogTypes.includes('all')) {
+            logs = logs.filter((log) =>
+              enabledLogTypes.some((type) => log.startsWith(`[${type}]`)),
+            );
+          }
+          // process.stdout.write(
+          //   `[DEBUG] Filtered logs for test: ${testName} - ${JSON.stringify(logs, null, 2)}\n`,
+          // );
+          (test as any).consoleLogs = logs;
+        } else {
+          (test as any).consoleLogs = [];
+        }
       }
     }
 
     // Prepare data for the EJS template
     const data = {
       packageName: this.globalConfig.rootDir ? path.basename(this.globalConfig.rootDir) : 'Project',
-      date: new Date(),
+      date: this.startTime,
       testResults: runResults.testResults,
       ...this.getOptions(),
     };
 
     // Generate the markdown report using gen.ejs
     try {
+      fs.writeFileSync('output.json', JSON.stringify(data, null, 2));
       const report = await (MDGenerator as any).generate(data, data.date);
       if (!fs.existsSync(this.publicPath)) fs.mkdirSync(this.publicPath, { recursive: true });
       const filename = path.join(this.publicPath, this.filename);
