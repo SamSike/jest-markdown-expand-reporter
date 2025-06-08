@@ -4,7 +4,6 @@ module.exports = {
   testEnvironment: 'node',
   testMatch: ['**/__tests__/**/*.test.ts', '**/*.test.ts'],
   reporters: [
-    // 'default',
     [
       './dist/mdReporter.js',
       {

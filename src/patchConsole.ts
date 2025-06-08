@@ -1,6 +1,7 @@
 const logs: Record<string, { type: string; message: string; origin: string }[]> = {};
 const origConsole: Partial<typeof console> = {};
 const methods = ['log', 'error', 'warn', 'info', 'debug'] as const;
+const JEST_CONSOLE_STACK_LINES = parseInt(process.env.JEST_CONSOLE_STACK_LINES || '1', 10);
 
 beforeEach(() => {
   const testName = expect.getState().currentTestName || 'unknown';
@@ -9,10 +10,12 @@ beforeEach(() => {
     origConsole[method] = console[method];
     console[method] = (...args: any[]) => {
       // Capture origin (file:line)
+      const MIN = 2;
+      const MAX = JEST_CONSOLE_STACK_LINES >= 0 ? 2 + JEST_CONSOLE_STACK_LINES : 3;
       const stackLines =
         new Error().stack
           ?.split('\n')
-          .slice(2, 5)
+          .slice(MIN, MAX)
           .map((line) => line.trim())
           .join('\n') || '';
       logs[testName].push({
@@ -40,9 +43,6 @@ afterAll(() => {
   const state = expect.getState();
   const suitePath = state.testPath || 'unknown-suite';
   const suiteName = path.basename(suitePath, path.extname(suitePath));
-  // process.stdout.write(
-  //   `[DEBUG] Writing logs to temporary file for suite: ${suiteName}\n${JSON.stringify(logs, null, 2)}\n`,
-  // );
   const tmpLogFile = path.join(os.tmpdir(), `jest-md-logs-${suiteName}.json`);
   fs.writeFileSync(tmpLogFile, JSON.stringify(logs, null, 2));
 });

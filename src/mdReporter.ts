@@ -90,18 +90,12 @@ class MDReporter {
           enabledLogTypes.includes('all') ||
           enabledLogTypes.some((type) => logs.some((log) => log.startsWith(`[${type}]`)))
         ) {
-          // process.stdout.write(
-          //   `[DEBUG] Attaching logs for test: ${testName} from suite: ${suiteFile}\n`,
-          // );
           // If not 'all', filter logs by enabled types
           if (!enabledLogTypes.includes('all')) {
             logs = logs.filter((log) =>
               enabledLogTypes.some((type) => log.startsWith(`[${type}]`)),
             );
           }
-          // process.stdout.write(
-          //   `[DEBUG] Filtered logs for test: ${testName} - ${JSON.stringify(logs, null, 2)}\n`,
-          // );
           (test as any).consoleLogs = logs;
         } else {
           (test as any).consoleLogs = [];
@@ -119,7 +113,6 @@ class MDReporter {
 
     // Generate the markdown report using gen.ejs
     try {
-      fs.writeFileSync('output.json', JSON.stringify(data, null, 2));
       const report = await (MDGenerator as any).generate(data, data.date);
       if (!fs.existsSync(this.publicPath)) fs.mkdirSync(this.publicPath, { recursive: true });
       const filename = path.join(this.publicPath, this.filename);

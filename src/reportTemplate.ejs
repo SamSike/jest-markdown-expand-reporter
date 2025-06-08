@@ -32,23 +32,36 @@
       <%_ const displayLogs = (typeof consoleLogs !== 'undefined') && consoleLogs.length > 0 && (test.consoleLogs && test.consoleLogs.length > 0); _%>
       <%_ const displayFailureMessages = (typeof failureMessages !== 'undefined') && failureMessages && test.failureMessages && test.failureMessages.length > 0; _%>
       <%_ if (displayLogs || displayFailureMessages) { _%>
+      <%_ if (displayLogs) { _%>
       <tr>
         <td colspan="4">
           <details>
             <summary>Console Logs</summary>
             <pre>
-              <!-- consoleLogs -->
-              <%_ if (displayLogs && (test.consoleLogs && test.consoleLogs.length > 0)) { _%>
-              <%= JSON.stringify(test.consoleLogs, null, 2) %>
-              <%_ } _%>
-              <!-- failureMessages -->
-              <%_ if (failureMessages && test.failureMessages && test.failureMessages.length > 0) { _%>
-              <%= test.failureMessages %>
-              <%_ } _%>
-            </pre>
+                <!-- consoleLogs -->
+                <%_ if (displayLogs && (test.consoleLogs && test.consoleLogs.length > 0)) { _%>
+                <%= JSON.stringify(test.consoleLogs, null, 2) %>
+                <%_ } _%>
+              </pre>
           </details>
         </td>
       </tr>
+      <%_ } _%>
+      <%_ if (displayFailureMessages) { _%>
+      <tr>
+        <td colspan="4">
+          <details>
+            <summary>Failure Messages</summary>
+            <pre>
+                <!-- failureMessages -->
+                <%_ if (failureMessages && test.failureMessages && test.failureMessages.length > 0) { _%>
+                <%= test.failureMessages %>
+                <%_ } _%>
+              </pre>
+          </details>
+        </td>
+      </tr>
+      <%_ } _%>
       <%_ } _%>
       <%_ } _%>
       <%_ } _%>
