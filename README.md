@@ -1,37 +1,45 @@
-# jest-gh-md-reporter
+# jest-markdown-expand-reporter
 
-This daft little package hooks into your node project and outputs your test results to a markdown file.
+This package outputs test results to a visually appealing markdown file.
 
 ## Configuration
 
-To install this reporter and get going, it should be as simple as:
+The options are as follows:
+
+| Option          | Type    | Default         | Description                         | Sample                                                            |
+| --------------- | ------- | --------------- | ----------------------------------- | ----------------------------------------------------------------- |
+| filename        | string  | test-results.md | Name of the markdown output file    |                                                                   |
+| publicPath      | string  | ./              | Directory for the output file       |                                                                   |
+| displayAll      | boolean | false           | Show all tests, not just failures   | ![sample-outputs/displayAll](sample-outputs/displayAll)           |
+| failureMessages | boolean | true            | Show failure messages in the report | ![sample-outputs/failureMessages](sample-outputs/failureMessages) |
+| consoleLogs     | array   | []              | Types of console logs to include    | ![sample-outputs/allOptions](sample-outputs/allOptions)           |
+
+To install this reporter, it should be as simple as:
 
 ```bash
-npm i jest-gh-md-reporter
+npm i jest-markdown-expand-reporter
 ```
 
-And theeeeeeen:
+Update jest.config.js or package.json as follows:
+(To capture console logs in the output)
 
 ```json
-	"jest": {
-        // Truncated for brevity
-		"reporters": [
-			"default",
-			[
-				"jest-gh-md-reporter",
-				{
-					"filename": "test-report.md",
-					"publicPath": "./test-reports"
-				}
-			]
-		]
-	},
+ "jest": {
+  "setupFilesAfterEnv": ["jest-markdown-expand-reporter/dist/patchConsole.js"],
+	"reporters": [
+		[
+			"jest-markdown-expand-reporter",
+			{
+				"filename": "test-report.md",
+				"publicPath": "./test-reports",
+				"displayAllTests": true,
+				"consoleLogs": ["all"],
+			},
+		],
+	],
+ },
 ```
-
-This'll give you some lovely test output that looks like:
-
-![This!](./test-report.png)
 
 ## Contribution
 
-This was put together over a very hungover Saturday. Totally down for contribution, hit me up!
+Reach out to me for contribution or to request updates :)

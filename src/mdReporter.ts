@@ -130,7 +130,7 @@ class MDReporter {
 
     // Generate the markdown report using gen.ejs
     try {
-      fs.writeFileSync('output.json', JSON.stringify(data, null, 2));
+      // fs.writeFileSync('output.json', JSON.stringify(data, null, 2));
       const report = await (MDGenerator as any).generate(data, data.date);
       if (!fs.existsSync(this.publicPath)) fs.mkdirSync(this.publicPath, { recursive: true });
       const filename = path.join(this.publicPath, this.filename);
