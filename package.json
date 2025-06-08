@@ -2,15 +2,20 @@
   "name": "jest-markdown-expand-reporter",
   "version": "0.0.1",
   "description": "A markdown reporter for Jest tests with expandable sections containing per test console logs",
-  "keywords": [],
   "license": "MIT",
   "original-author": "Chris Shepherd",
   "original-author-url": "https://www.npmjs.com/package/jest-gh-md-reporter",
   "author": "Sameer Sikka",
   "main": "dist/mdReporter.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SamSike/jest-markdown-expand-reporter"
+  },
+  "homepage": "https://github.com/SamSike/jest-markdown-expand-reporter#readme",
   "scripts": {
     "build": "tsc && cp src/*.ejs dist/",
     "update": "rm -rf dist && rm *.tgz && yarn build && yarn unlink && yarn pack && yarn link",
+    "open:tgz": "tar -tzf *.tgz",
     "test:mutation": "yarn build && stryker run",
     "test:unit": "jest --clearCache && yarn build && rm -rf .stryker-tmp && jest --coverage --testPathIgnorePatterns=mdReporter",
     "test": "yarn build && jest mdReporter.test.js",
@@ -38,5 +43,18 @@
     "prettier": "^3.5.3",
     "ts-jest": "^29.3.4",
     "typescript": "^5.8.3"
-  }
+  },
+  "keywords": [
+    "jest",
+    "jest-reporter",
+    "markdown",
+    "test-reporter",
+    "console-log",
+    "expandable",
+    "report",
+    "testing",
+    "logs",
+    "ci",
+    "custom-reporter"
+  ]
 }

@@ -20,12 +20,17 @@ To install this reporter, it should be as simple as:
 npm i jest-markdown-expand-reporter
 ```
 
+or
+
+```bash
+yarn add jest-markdown-expand-reporter
+```
+
 Update jest.config.js or package.json as follows:
-(To capture console logs in the output)
 
 ```json
  "jest": {
-  "setupFilesAfterEnv": ["jest-markdown-expand-reporter/dist/patchConsole.js"],
+  "setupFilesAfterEnv": ["jest-markdown-expand-reporter/dist/patchConsole.js"], // To capture console logs in the output
 	"reporters": [
 		[
 			"jest-markdown-expand-reporter",
