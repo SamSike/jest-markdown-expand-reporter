@@ -6,13 +6,13 @@ A markdown reporter for Jest tests with expandable sections containing per test 
 
 The options are as follows:
 
-| Option          | Type    | Default         | Description                         | Sample                                                            |
-| --------------- | ------- | --------------- | ----------------------------------- | ----------------------------------------------------------------- |
-| filename        | string  | test-results.md | Name of the markdown output file    |                                                                   |
-| publicPath      | string  | ./              | Directory for the output file       |                                                                   |
-| displayAll      | boolean | false           | Show all tests, not just failures   | ![sample-outputs/displayAll](sample-outputs/displayAll)           |
-| failureMessages | boolean | true            | Show failure messages in the report | ![sample-outputs/failureMessages](sample-outputs/failureMessages) |
-| consoleLogs     | array   | []              | Types of console logs to include    | ![sample-outputs/allOptions](sample-outputs/allOptions)           |
+| Option          | Type    | Default         | Description                         | Sample                                                           |
+| --------------- | ------- | --------------- | ----------------------------------- | ---------------------------------------------------------------- |
+| filename        | string  | test-results.md | Name of the markdown output file    |                                                                  |
+| publicPath      | string  | ./              | Directory for the output file       |                                                                  |
+| displayAll      | boolean | false           | Show all tests, not just failures   | [sample-outputs/displayAll](sample-outputs/displayAll)           |
+| failureMessages | boolean | true            | Show failure messages in the report | [sample-outputs/failureMessages](sample-outputs/failureMessages) |
+| consoleLogs     | array   | []              | Types of console logs to include    | [sample-outputs/allOptions](sample-outputs/allOptions)           |
 
 To install this reporter, it should be as simple as:
 
