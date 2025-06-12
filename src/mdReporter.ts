@@ -22,6 +22,7 @@ interface ReporterOptions {
   consoleLogs?: LogOptions[];
   displayAllTests?: boolean;
   failureMessages?: boolean;
+  ciOutput?: string[];
 }
 
 interface LogSyntax {
@@ -37,9 +38,10 @@ class MDReporter {
 
   filename: string;
   publicPath: string;
+  ciOutput: string[];
   consoleLogs: string[];
-  displayAllTests: boolean = false;
-  failureMessages: boolean = true;
+  displayAllTests: boolean;
+  failureMessages: boolean;
 
   logs: Record<string, ConsoleBuffer> = {};
 
@@ -48,6 +50,7 @@ class MDReporter {
     this.options = reporterOptions || {};
     this.filename = this.options.filename || 'test-results.md';
     this.publicPath = this.options.publicPath || './';
+    this.ciOutput = this.options.ciOutput || [];
     this.consoleLogs = this.options.consoleLogs || [];
     this.displayAllTests = this.options.displayAllTests || false;
     this.failureMessages = this.options.failureMessages || true;
@@ -135,6 +138,19 @@ class MDReporter {
       if (!fs.existsSync(this.publicPath)) fs.mkdirSync(this.publicPath, { recursive: true });
       const filename = path.join(this.publicPath, this.filename);
       fs.writeFileSync(filename, report);
+
+      // If CI output is specified, write the report to each specified environment variable
+      if (this.ciOutput.length > 0) {
+        for (const envVar of this.ciOutput) {
+          const envPath = process.env[envVar];
+          if (envPath) {
+            fs.writeFileSync(envPath, report, { flag: 'a' }); // Append to the file
+            // process.stdout.write(`Markdown report written to ${envVar}: ${envPath}\n`);
+          } else {
+            process.stderr.write(`Environment variable ${envVar} is not set.\n`);
+          }
+        }
+      }
       // process.stdout.write(`Markdown report generated at: ${filename}\n`);
     } catch (err) {
       process.stderr.write(`Markdown report generation failed: ${JSON.stringify(err, null, 2)}\n`);
