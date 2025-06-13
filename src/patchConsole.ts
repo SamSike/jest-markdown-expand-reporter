@@ -1,3 +1,5 @@
+import util from 'util';
+
 const logs: Record<string, { type: string; message: string; origin: string }[]> = {};
 const origConsole: Partial<typeof console> = {};
 const methods = ['log', 'error', 'warn', 'info', 'debug'] as const;
@@ -20,7 +22,7 @@ beforeEach(() => {
           .join('\n') || '';
       logs[testName].push({
         type: method,
-        message: args.join(' '),
+        message: util.format(...args),
         origin: stackLines,
       });
       origConsole[method]?.apply(console, args);
