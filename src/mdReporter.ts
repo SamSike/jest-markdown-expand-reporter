@@ -137,6 +137,11 @@ class MDReporter {
       const report = await (MDGenerator as any).generate(data, data.date);
       if (!fs.existsSync(this.publicPath)) fs.mkdirSync(this.publicPath, { recursive: true });
       const filename = path.join(this.publicPath, this.filename);
+
+      // If the file already exists, delete it before writing the new report
+      if (fs.existsSync(filename)) {
+        fs.unlinkSync(filename);
+      }
       fs.writeFileSync(filename, report);
 
       // If CI output is specified, write the report to each specified environment variable
