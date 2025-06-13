@@ -15,7 +15,7 @@
   "scripts": {
     "build": "tsc && cp src/*.ejs dist/",
     "update:local": "rm -rf dist && rm *.tgz && yarn build && yarn unlink && yarn pack && yarn link",
-    "update:publish": "npm login && npm publish",
+    "update:publish": "npm publish",
     "open:tgz": "tar -tzf *.tgz",
     "test:mutation": "yarn build && stryker run",
     "test:unit": "jest --clearCache && yarn build && rm -rf .stryker-tmp && jest --coverage --testPathIgnorePatterns=mdReporter",
