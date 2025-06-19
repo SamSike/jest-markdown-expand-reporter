@@ -1,4 +1,10 @@
 <% logs.forEach(function(log) { %>
 <code>console.<%= log.type %></code>
-&nbsp;&nbsp;<%= log.message %>
+&nbsp;&nbsp;<%= log.message
+      .replace(/\u001b\[[0-9;]*m/g, '') // Remove ANSI color codes
+      .split('\n')
+      .map(line => line.trimStart())    // Remove leading spaces from every line
+      .join('\n')
+      .trimStart()
+    %>
 &nbsp;&nbsp;<%= log.origin %><% }); %>

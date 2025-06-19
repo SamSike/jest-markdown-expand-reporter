@@ -3,6 +3,7 @@ module.exports = {
   setupFilesAfterEnv: ['./src/patchConsole.ts'],
   testEnvironment: 'node',
   testMatch: ['**/__tests__/**/*.test.ts', '**/*.test.ts'],
+  // testPathIgnorePatterns: ['/node_modules/', '/dist/', '/coverage/', '/__tests__/samples/'],
   reporters: [
     [
       './dist/mdReporter.js',

@@ -31,7 +31,6 @@
       </tr>
       <%_ const displayLogs = (typeof consoleLogs !== 'undefined') && consoleLogs.length > 0 && (test.consoleLogs && test.consoleLogs.length > 0); _%>
       <%_ const displayFailureMessages = (typeof failureMessages !== 'undefined') && failureMessages && test.failureMessages && test.failureMessages.length > 0; _%>
-      <%_ if (displayLogs || displayFailureMessages) { _%>
       <%_ if (displayLogs) { _%>
       <tr>
         <td colspan="4">
@@ -47,20 +46,21 @@
         <td colspan="4">
           <details>
             <summary>Failure Messages</summary>
-            <pre><%= test.failureMessages
-                  .map(msg =>
-                    msg
-                      .replace(/\u001b\[[0-9;]*m/g, '') // Remove ANSI color codes
-                      .split('\n')
-                      .map(line => line.trimStart())    // Remove leading spaces from every line
-                      .join('\n')
-                      .trimStart()
-                  )
-                  .join('\n\n') %></pre>
-          </details>
+
+```diff
+<%- test.failureMessages
+.map(msg =>
+  msg
+    .replace(/\u001b\[[0-9;]*m/g, '') // Remove ANSI color codes
+    .replace(/\r\n/g, '\n')           // Normalize line endings
+    .trim()
+)
+.join('\n\n')
+%>
+```
+</details>
         </td>
       </tr>
-      <%_ } _%>
       <%_ } _%>
       <%_ } _%>
       <%_ } _%>

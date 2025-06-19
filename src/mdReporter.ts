@@ -1,7 +1,21 @@
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
-import MDGenerator from './mdGenerator';
+let fs: typeof import('fs') | null = null;
+let path: typeof import('path') | null = null;
+let os: typeof import('os') | null = null;
+let MDGenerator: any = null;
+
+try {
+  fs = require('fs');
+} catch {}
+try {
+  path = require('path');
+} catch {}
+try {
+  os = require('os');
+} catch {}
+try {
+  MDGenerator = require('./mdGenerator').default || require('./mdGenerator');
+} catch {}
+
 import type { AggregatedResult, TestResult, AssertionResult } from '@jest/test-result';
 import type { ConsoleBuffer } from '@jest/console';
 import type { Config } from '@jest/types';
@@ -67,10 +81,17 @@ class MDReporter {
   }
 
   async onTestResult(test: any, testResult: TestResult) {
-    this.logs[test.fullName || test.title] = testResult.console || [];
+    if (!path) return;
+
+    const suitePath = test.path || test.testFilePath || 'unknown-suite';
+    const suiteName = path.basename(suitePath, path.extname(suitePath));
+    const testKey = `${suiteName}::${test.fullName || test.title}`;
+    this.logs[testKey] = testResult.console || [];
   }
 
   async onRunComplete(contexts: Set<unknown>, runResults: AggregatedResult) {
+    if (!fs || !path || !os || !MDGenerator) return false;
+
     const tmpDir = os.tmpdir();
     const enabledLogTypes = (this.consoleLogs || []).map((type) => type.toLowerCase());
 
