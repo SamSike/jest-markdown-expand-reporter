@@ -28,4 +28,17 @@ describe('Sample', () => {
     console.debug('Test stringify(,null,2) obj', JSON.stringify(obj, null, 2));
     expect(1 + 1).toBe(2);
   });
+
+  it('should expect different object', () => {
+    const expectedObj = {
+      name: 'Sample',
+      description: 'This is a sample test',
+      details: {
+        info: 'This is some additional information',
+        date: new Date().toISOString(),
+      },
+    };
+    console.log('This should expect different object', expectedObj);
+    expect(obj).toEqual(expectedObj);
+  });
 });

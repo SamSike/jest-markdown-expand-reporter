@@ -1,9 +1,16 @@
-import ejs from 'ejs';
-import fs from 'fs';
-import path from 'path';
+let ejs: typeof import('ejs') | null = null;
+let path: typeof import('path') | null = null;
+
+try {
+  ejs = require('ejs');
+} catch {}
+try {
+  path = require('path');
+} catch {}
 
 class MDGenerator {
   static async generate(runResults: any, date: Date): Promise<string> {
+    if (!ejs || !path) return '';
     const packageName = process.env.npm_package_name;
     try {
       const templatePath = path.join(__dirname, 'reportTemplate.ejs');
@@ -13,9 +20,9 @@ class MDGenerator {
         packageName,
       });
       return results as string;
-    } catch (error) {
-      process.stderr.write(`Error generating markdown report: ${error}\n`);
-      throw error;
+    } catch {
+      // Fail silently and gracefully
+      return '';
     }
   }
 }

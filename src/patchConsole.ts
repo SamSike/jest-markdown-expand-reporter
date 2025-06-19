@@ -1,4 +1,9 @@
-import util from 'util';
+let utilSafe: typeof import('util') | null = null;
+try {
+  utilSafe = require('util');
+} catch {
+  utilSafe = null;
+}
 
 const logs: Record<string, { type: string; message: string; origin: string }[]> = {};
 const origConsole: Partial<typeof console> = {};
@@ -6,45 +11,66 @@ const methods = ['log', 'error', 'warn', 'info', 'debug'] as const;
 const JEST_CONSOLE_STACK_LINES = parseInt(process.env.JEST_CONSOLE_STACK_LINES || '1', 10);
 
 beforeEach(() => {
-  const testName = expect.getState().currentTestName || 'unknown';
-  logs[testName] = [];
-  methods.forEach((method) => {
-    origConsole[method] = console[method];
-    console[method] = (...args: any[]) => {
-      // Capture origin (file:line)
-      const MIN = 2;
-      const MAX = JEST_CONSOLE_STACK_LINES >= 0 ? 2 + JEST_CONSOLE_STACK_LINES : 3;
-      const stackLines =
-        new Error().stack
-          ?.split('\n')
-          .slice(MIN, MAX)
-          .map((line) => line.trim())
-          .join('\n') || '';
-      logs[testName].push({
-        type: method,
-        message: util.format(...args),
-        origin: stackLines,
-      });
-      origConsole[method]?.apply(console, args);
-    };
-  });
+  try {
+    const jestExpect = (global as any).expect;
+    const testName = jestExpect.getState().currentTestName || 'unknown';
+    logs[testName] = [];
+    methods.forEach((method) => {
+      origConsole[method] = console[method];
+      console[method] = (...args: any[]) => {
+        try {
+          // Capture origin (file:line)
+          const MIN = 2;
+          const MAX = JEST_CONSOLE_STACK_LINES >= 0 ? 2 + JEST_CONSOLE_STACK_LINES : 3;
+          const stackLines =
+            new Error().stack
+              ?.split('\n')
+              .slice(MIN, MAX)
+              .map((line) => line.trim())
+              .join('\n') || '';
+          logs[testName].push({
+            type: method,
+            message: utilSafe ? utilSafe.format(...args) : args.map(String).join(' '),
+            origin: stackLines,
+          });
+        } catch {}
+        try {
+          origConsole[method]?.apply(console, args);
+        } catch {}
+      };
+    });
+  } catch {}
 });
 
 afterEach(() => {
-  methods.forEach((method) => {
-    if (origConsole[method]) {
-      console[method] = origConsole[method]!;
-    }
-  });
+  try {
+    methods.forEach((method) => {
+      if (origConsole[method]) {
+        console[method] = origConsole[method]!;
+      }
+    });
+  } catch {}
 });
 
 afterAll(() => {
-  const fs = require('fs');
-  const os = require('os');
-  const path = require('path');
-  const state = expect.getState();
-  const suitePath = state.testPath || 'unknown-suite';
-  const suiteName = path.basename(suitePath, path.extname(suitePath));
-  const tmpLogFile = path.join(os.tmpdir(), `jest-md-logs-${suiteName}.json`);
-  fs.writeFileSync(tmpLogFile, JSON.stringify(logs, null, 2));
+  try {
+    let fs: typeof import('fs') | null = null;
+    let os: typeof import('os') | null = null;
+    let path: typeof import('path') | null = null;
+    try {
+      fs = require('fs');
+      os = require('os');
+      path = require('path');
+    } catch {}
+    if (fs && os && path) {
+      const jestExpect = (global as any).expect;
+      const state = jestExpect?.getState?.() || {};
+      const suitePath = state.testPath || 'unknown-suite';
+      const suiteName = path.basename(suitePath, path.extname(suitePath));
+      const tmpLogFile = path.join(os.tmpdir(), `jest-md-logs-${suiteName}.json`);
+      try {
+        fs.writeFileSync(tmpLogFile, JSON.stringify(logs, null, 2));
+      } catch {}
+    }
+  } catch {}
 });
