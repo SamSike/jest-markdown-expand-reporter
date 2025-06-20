@@ -8,17 +8,17 @@ try {
 const logs: Record<string, { type: string; message: string; origin: string }[]> = {};
 const origConsole: Partial<typeof console> = {};
 const methods = ['log', 'error', 'warn', 'info', 'debug'] as const;
-const JEST_CONSOLE_STACK_LINES = parseInt(process.env.JEST_CONSOLE_STACK_LINES || '1', 10);
+const JEST_CONSOLE_STACK_LINES = parseInt(process.env.JEST_CONSOLE_STACK_LINES ?? '1', 10);
 
 beforeEach(() => {
   try {
     const jestExpect = (global as any).expect;
-    const testName = jestExpect.getState().currentTestName || 'unknown';
-    logs[testName] = [];
+    const testName = jestExpect.getState().currentTestName ?? 'unknown';
+    logs[testName] ??= [];
     methods.forEach((method) => {
       origConsole[method] = console[method];
-      console[method] = (...args: any[]) => {
-        try {
+      try {
+        console[method] = (...args: any[]) => {
           // Capture origin (file:line)
           const MIN = 2;
           const MAX = JEST_CONSOLE_STACK_LINES >= 0 ? 2 + JEST_CONSOLE_STACK_LINES : 3;
@@ -27,17 +27,19 @@ beforeEach(() => {
               ?.split('\n')
               .slice(MIN, MAX)
               .map((line) => line.trim())
-              .join('\n') || '';
+              .join('\n') ?? '';
           logs[testName].push({
             type: method,
             message: utilSafe ? utilSafe.format(...args) : args.map(String).join(' '),
             origin: stackLines,
           });
-        } catch {}
-        try {
+          args.push(`\n  \x1b[90m${stackLines}\x1b[0m`);
           origConsole[method]?.apply(console, args);
-        } catch {}
-      };
+        };
+      } catch {
+        // In case patching console fails, we still want to log the message
+        console[method] = origConsole[method];
+      }
     });
   } catch {}
 });
@@ -64,8 +66,8 @@ afterAll(() => {
     } catch {}
     if (fs && os && path) {
       const jestExpect = (global as any).expect;
-      const state = jestExpect?.getState?.() || {};
-      const suitePath = state.testPath || 'unknown-suite';
+      const state = jestExpect?.getState?.() ?? {};
+      const suitePath = state.testPath ?? 'unknown-suite';
       const suiteName = path.basename(suitePath, path.extname(suitePath));
       const tmpLogFile = path.join(os.tmpdir(), `jest-md-logs-${suiteName}.json`);
       try {

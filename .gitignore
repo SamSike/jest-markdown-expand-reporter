@@ -6,6 +6,7 @@ dist/
 test-reports/
 coverage/
 reports/
+*.md
 
 # Release files
 *.tgz
