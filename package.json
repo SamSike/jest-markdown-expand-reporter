@@ -14,8 +14,9 @@
   "homepage": "https://github.com/SamSike/jest-markdown-expand-reporter#readme",
   "scripts": {
     "build": "tsc && cp src/*.ejs dist/",
+    "version:get": "node -p \"require('./package.json').version\"",
     "update:local": "rm -rf dist && rm -f *.tgz && yarn build && (yarn unlink || true) && yarn pack && yarn link",
-    "update:publish": "npm publish",
+    "update:publish": "npm publish && gh pr create --base main --head develop --title \"Release v$(yarn version:get)\"",
     "open:tgz": "tar -tzf *.tgz || echo 'No .tgz file found'",
     "test:mutation": "yarn build && stryker run",
     "test:unit": "jest --clearCache && yarn build && rm -rf .stryker-tmp && jest --coverage --testPathIgnorePatterns=mdReporter",
