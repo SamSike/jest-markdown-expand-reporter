@@ -61,13 +61,13 @@ class MDReporter {
 
   constructor(globalConfig: Config.GlobalConfig, reporterOptions?: ReporterOptions) {
     this.globalConfig = globalConfig;
-    this.options = reporterOptions || {};
-    this.filename = this.options.filename || 'test-results.md';
-    this.publicPath = this.options.publicPath || './';
-    this.ciOutput = this.options.ciOutput || [];
-    this.consoleLogs = this.options.consoleLogs || [];
-    this.displayAllTests = this.options.displayAllTests || false;
-    this.failureMessages = this.options.failureMessages || true;
+    this.options = reporterOptions ?? {};
+    this.filename = this.options.filename ?? 'test-results.md';
+    this.publicPath = this.options.publicPath ?? './';
+    this.ciOutput = this.options.ciOutput ?? [];
+    this.consoleLogs = this.options.consoleLogs ?? [];
+    this.displayAllTests = this.options.displayAllTests ?? false;
+    this.failureMessages = this.options.failureMessages ?? true;
     this.startTime = new Date();
     this.logs = {};
   }
@@ -83,17 +83,17 @@ class MDReporter {
   async onTestResult(test: any, testResult: TestResult) {
     if (!path) return;
 
-    const suitePath = test.path || test.testFilePath || 'unknown-suite';
+    const suitePath = test.path ?? test.testFilePath ?? 'unknown-suite';
     const suiteName = path.basename(suitePath, path.extname(suitePath));
-    const testKey = `${suiteName}::${test.fullName || test.title}`;
-    this.logs[testKey] = testResult.console || [];
+    const testKey = `${suiteName}::${test.fullName ?? test.title}`;
+    this.logs[testKey] = testResult.console ?? [];
   }
 
   async onRunComplete(contexts: Set<unknown>, runResults: AggregatedResult) {
     if (!fs || !path || !os || !MDGenerator) return false;
 
     const tmpDir = os.tmpdir();
-    const enabledLogTypes = (this.consoleLogs || []).map((type) => type.toLowerCase());
+    const enabledLogTypes = (this.consoleLogs ?? []).map((type) => type.toLowerCase());
 
     // For each test suite, read its corresponding log file
     for (const suite of runResults.testResults as TestResult[]) {
@@ -112,20 +112,20 @@ class MDReporter {
 
       // Attach logs to each test in the suite, filtering by enabled log types
       for (const test of suite.testResults as AssertionResult[]) {
-        const testName = test.fullName || test.title;
-        let logs = suiteLogs[testName] || [];
+        const testName = test.fullName ?? test.title;
+        let logs = suiteLogs[testName] ?? [];
 
         // Only include logs if enabled in options
         if (
           enabledLogTypes.includes('all') ||
           enabledLogTypes.some((type) =>
-            logs.some((log) => (log.type || '').toLowerCase() === type),
+            logs.some((log) => (log.type ?? '').toLowerCase() === type),
           )
         ) {
           // If not 'all', filter logs by enabled types
           if (!enabledLogTypes.includes('all')) {
             logs = logs.filter((log) =>
-              enabledLogTypes.some((type) => (log.type || '').toLowerCase() === type),
+              enabledLogTypes.some((type) => (log.type ?? '').toLowerCase() === type),
             );
           }
           (test as any).consoleLogs = logs;

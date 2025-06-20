@@ -14,7 +14,7 @@ beforeEach(() => {
   try {
     const jestExpect = (global as any).expect;
     const testName = jestExpect.getState().currentTestName ?? 'unknown';
-    logs[testName] = [];
+    logs[testName] ??= [];
     methods.forEach((method) => {
       origConsole[method] = console[method];
       try {
