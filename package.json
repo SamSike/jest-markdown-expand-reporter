@@ -1,6 +1,6 @@
 {
   "name": "jest-markdown-expand-reporter",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A markdown reporter for Jest tests with expandable sections containing per test console logs",
   "license": "MIT",
   "original-author": "Chris Shepherd",
@@ -14,9 +14,9 @@
   "homepage": "https://github.com/SamSike/jest-markdown-expand-reporter#readme",
   "scripts": {
     "build": "tsc && cp src/*.ejs dist/",
-    "update:local": "rm -rf dist && rm *.tgz && yarn build && yarn unlink && yarn pack && yarn link",
+    "update:local": "rm -rf dist && rm -f *.tgz && yarn build && (yarn unlink || true) && yarn pack && yarn link",
     "update:publish": "npm publish",
-    "open:tgz": "tar -tzf *.tgz",
+    "open:tgz": "tar -tzf *.tgz || echo 'No .tgz file found'",
     "test:mutation": "yarn build && stryker run",
     "test:unit": "jest --clearCache && yarn build && rm -rf .stryker-tmp && jest --coverage --testPathIgnorePatterns=mdReporter",
     "test": "yarn build && jest mdReporter.test.js",

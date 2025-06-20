@@ -1,6 +1,6 @@
 module.exports = {
   preset: 'ts-jest',
-  setupFilesAfterEnv: ['./src/patchConsole.ts'],
+  setupFilesAfterEnv: ['./dist/patchConsole.js'],
   testEnvironment: 'node',
   testMatch: ['**/__tests__/**/*.test.ts', '**/*.test.ts'],
   // testPathIgnorePatterns: ['/node_modules/', '/dist/', '/coverage/', '/__tests__/samples/'],
