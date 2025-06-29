@@ -20,7 +20,8 @@ class MDGenerator {
         packageName,
       });
       return results as string;
-    } catch {
+    } catch (error) {
+      process.stderr.write(`Error generating report: ${error}\n`);
       // Fail silently and gracefully
       return '';
     }

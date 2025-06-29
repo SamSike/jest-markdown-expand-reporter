@@ -37,6 +37,7 @@ interface ReporterOptions {
   displayAllTests?: boolean;
   failureMessages?: boolean;
   ciOutput?: string[];
+  prioritizeFailures?: boolean;
 }
 
 interface LogSyntax {
@@ -56,6 +57,7 @@ class MDReporter {
   consoleLogs: string[];
   displayAllTests: boolean;
   failureMessages: boolean;
+  prioritizeFailures: boolean;
 
   logs: Record<string, ConsoleBuffer> = {};
 
@@ -68,6 +70,7 @@ class MDReporter {
     this.consoleLogs = this.options.consoleLogs ?? [];
     this.displayAllTests = this.options.displayAllTests ?? false;
     this.failureMessages = this.options.failureMessages ?? true;
+    this.prioritizeFailures = this.options.prioritizeFailures ?? false;
     this.startTime = new Date();
     this.logs = {};
   }
@@ -77,6 +80,7 @@ class MDReporter {
       consoleLogs: this.consoleLogs,
       displayAllTests: this.displayAllTests,
       failureMessages: this.failureMessages,
+      prioritizeFailures: this.prioritizeFailures,
     };
   }
 

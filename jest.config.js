@@ -12,6 +12,7 @@ module.exports = {
         publicPath: './test-reports',
         displayAllTests: true,
         consoleLogs: ['all'],
+        prioritizeFailures: true,
         ciOutput: ['GITHUB_STEP_SUMMARY'],
       },
     ],

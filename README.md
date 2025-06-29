@@ -12,6 +12,7 @@ The options are as follows:
 | displayAll | boolean | false | Show all tests, not just failures | [sample-outputs/displayAll](sample-outputs/displayAll) | |
 | failureMessages | boolean | true | Show failure messages in the report| [sample-outputs/failureMessages](sample-outputs/failureMessages) | |
 | consoleLogs | string[] | [] | Types of console logs to include | [sample-outputs/allOptions](sample-outputs/allOptions) | "all", "debug", "info", "error", "log", "warn" |
+| prioritizeFailures | boolean | false | Display failed tests at the top with jump links | | |
 | ciOutput | string[] | []| Output for CI environments| | Environment Variables to be used as output|
 
 To install this reporter, it should be as simple as:
