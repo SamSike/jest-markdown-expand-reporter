@@ -92,6 +92,7 @@ class MDReporter {
       displayAllTests: this.displayAllTests,
       failureMessages: this.failureMessages,
       prioritizeFailures: this.prioritizeFailures,
+      skipDisplayIfNoFailures: this.skipDisplayIfNoFailures,
     };
   }
 
@@ -191,10 +192,7 @@ class MDReporter {
 
     try {
       const summaryReport = await (MDSummaryGenerator as any).generate(data, data.date);
-      const testByTestReport =
-        data.numFailedTests === 0 && this.skipDisplayIfNoFailures
-          ? ''
-          : await (MDTestByTestGenerator as any).generate(data, data.date);
+      const testByTestReport = await (MDTestByTestGenerator as any).generate(data, data.date);
       if (!fs.existsSync(this.publicPath)) fs.mkdirSync(this.publicPath, { recursive: true });
       const filename = path.join(this.publicPath, this.filename);
       fs.writeFileSync(filename, summaryReport + testByTestReport, 'utf8');
