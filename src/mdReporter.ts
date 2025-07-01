@@ -1,7 +1,8 @@
 let fs: typeof import('fs') | null = null;
 let path: typeof import('path') | null = null;
 let os: typeof import('os') | null = null;
-let MDGenerator: any = null;
+let MDSummaryGenerator: any = null;
+let MDTestByTestGenerator: any = null;
 
 try {
   fs = require('fs');
@@ -13,12 +14,15 @@ try {
   os = require('os');
 } catch {}
 try {
-  MDGenerator = require('./mdGenerator').default || require('./mdGenerator');
+  MDSummaryGenerator = require('./mdSummaryGenerator').default || require('./mdSummaryGenerator');
+  MDTestByTestGenerator =
+    require('./mdTestByTestGenerator').default || require('./mdTestByTestGenerator');
 } catch {}
 
 import type { AggregatedResult, TestResult, AssertionResult } from '@jest/test-result';
 import type { ConsoleBuffer } from '@jest/console';
 import type { Config } from '@jest/types';
+import { safePrependAppend } from './fileLockUtils';
 
 enum LogOptions {
   // Display console logs in the report
@@ -38,6 +42,8 @@ interface ReporterOptions {
   failureMessages?: boolean;
   ciOutput?: string[];
   prioritizeFailures?: boolean;
+  skipDisplayIfNoFailures?: boolean;
+  enableAnnotations?: boolean;
 }
 
 interface LogSyntax {
@@ -58,6 +64,8 @@ class MDReporter {
   displayAllTests: boolean;
   failureMessages: boolean;
   prioritizeFailures: boolean;
+  skipDisplayIfNoFailures: boolean;
+  enableAnnotations: boolean;
 
   logs: Record<string, ConsoleBuffer> = {};
 
@@ -71,6 +79,9 @@ class MDReporter {
     this.displayAllTests = this.options.displayAllTests ?? false;
     this.failureMessages = this.options.failureMessages ?? true;
     this.prioritizeFailures = this.options.prioritizeFailures ?? false;
+    this.skipDisplayIfNoFailures = this.options.skipDisplayIfNoFailures ?? true;
+    this.enableAnnotations =
+      this.options.enableAnnotations ?? 'GITHUB_STEP_SUMMARY' in this.ciOutput;
     this.startTime = new Date();
     this.logs = {};
   }
@@ -81,6 +92,8 @@ class MDReporter {
       displayAllTests: this.displayAllTests,
       failureMessages: this.failureMessages,
       prioritizeFailures: this.prioritizeFailures,
+      skipDisplayIfNoFailures: this.skipDisplayIfNoFailures,
+      enableAnnotations: this.enableAnnotations,
     };
   }
 
@@ -94,7 +107,7 @@ class MDReporter {
   }
 
   async onRunComplete(contexts: Set<unknown>, runResults: AggregatedResult) {
-    if (!fs || !path || !os || !MDGenerator) return false;
+    if (!fs || !path || !os || !MDSummaryGenerator) return false;
 
     const tmpDir = os.tmpdir();
     const enabledLogTypes = (this.consoleLogs ?? []).map((type) => type.toLowerCase());
@@ -136,6 +149,28 @@ class MDReporter {
         } else {
           (test as any).consoleLogs = [];
         }
+
+        // Output GitHub Actions annotations for each failed test if enabled
+        if (this.enableAnnotations && process.env.GITHUB_STEP_SUMMARY) {
+          if (test.status === 'failed' && test.failureMessages && test.failureMessages.length > 0) {
+            // Try to extract line/column from failure stack, fallback to suiteFile
+            let file = suiteFile;
+            let line = 1;
+            let col = 1;
+            const stack = test.failureMessages.join('\n');
+            const match =
+              stack.match(/at .*\((.*):(\d+):(\d+)\)/) || stack.match(/at (.*):(\d+):(\d+)/);
+            if (match) {
+              file = match[1] || suiteFile;
+              line = parseInt(match[2] || '1', 10);
+              col = parseInt(match[3] || '1', 10);
+            }
+            // Output GitHub Actions error annotation
+            process.stdout.write(
+              `::error file=${file},line=${line},col=${col}::${test.fullName || test.title}\n`,
+            );
+          }
+        }
       }
     }
 
@@ -156,32 +191,24 @@ class MDReporter {
       numTotalTests: runResults.numTotalTests,
     };
 
-    // Generate the markdown report using gen.ejs
     try {
-      // fs.writeFileSync('output.json', JSON.stringify(data, null, 2));
-      const report = await (MDGenerator as any).generate(data, data.date);
+      const summaryReport = await (MDSummaryGenerator as any).generate(data, data.date);
+      const testByTestReport = await (MDTestByTestGenerator as any).generate(data, data.date);
       if (!fs.existsSync(this.publicPath)) fs.mkdirSync(this.publicPath, { recursive: true });
       const filename = path.join(this.publicPath, this.filename);
-
-      // If the file already exists, delete it before writing the new report
-      if (fs.existsSync(filename)) {
-        fs.unlinkSync(filename);
-      }
-      fs.writeFileSync(filename, report);
+      fs.writeFileSync(filename, summaryReport + testByTestReport, 'utf8');
 
       // If CI output is specified, write the report to each specified environment variable
       if (this.ciOutput.length > 0) {
         for (const envVar of this.ciOutput) {
           const envPath = process.env[envVar];
           if (envPath) {
-            fs.writeFileSync(envPath, report, { flag: 'a' }); // Append to the file
-            // process.stdout.write(`Markdown report written to ${envVar}: ${envPath}\n`);
+            await safePrependAppend(envPath, summaryReport, testByTestReport, 'utf8');
           } else {
             process.stderr.write(`Environment variable ${envVar} is not set.\n`);
           }
         }
       }
-      // process.stdout.write(`Markdown report generated at: ${filename}\n`);
     } catch (err) {
       process.stderr.write(`Markdown report generation failed: ${JSON.stringify(err, null, 2)}\n`);
       process.exitCode = 1;

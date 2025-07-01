@@ -1,0 +1,12 @@
+
+---
+
+# <%= packageName %> Test Results
+
+> **Started**: <%= date.toUTCString(); %>
+
+<center>
+
+  ## Tests In Order of Execution
+  <%- include('displayTests.ejs', { prioritizeFailures: false }) %>
+</center>

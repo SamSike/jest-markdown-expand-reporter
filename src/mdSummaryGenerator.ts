@@ -13,7 +13,7 @@ class MDGenerator {
     if (!ejs || !path) return '';
     const packageName = process.env.npm_package_name;
     try {
-      const templatePath = path.join(__dirname, 'reportTemplate.ejs');
+      const templatePath = path.join(__dirname, 'summaryTemplate.ejs');
       const results = await ejs.renderFile(templatePath, {
         ...runResults,
         date,

@@ -14,6 +14,7 @@ module.exports = {
         consoleLogs: ['all'],
         prioritizeFailures: true,
         ciOutput: ['GITHUB_STEP_SUMMARY'],
+        enableAnnotations: true,
       },
     ],
   ],
