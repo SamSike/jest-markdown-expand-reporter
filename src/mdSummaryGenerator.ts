@@ -13,14 +13,15 @@ class MDGenerator {
     if (!ejs || !path) return '';
     const packageName = process.env.npm_package_name;
     try {
-      const templatePath = path.join(__dirname, 'reportTemplate.ejs');
+      const templatePath = path.join(__dirname, 'summaryTemplate.ejs');
       const results = await ejs.renderFile(templatePath, {
         ...runResults,
         date,
         packageName,
       });
       return results as string;
-    } catch {
+    } catch (error) {
+      process.stderr.write(`Error generating report: ${error}\n`);
       // Fail silently and gracefully
       return '';
     }

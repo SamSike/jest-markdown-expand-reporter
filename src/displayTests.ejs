@@ -1,0 +1,68 @@
+<%_ for(var i=0; i < testResults.length; i++) { _%>
+<%_ const result = testResults[i]; _%>
+<%_ if (result.numFailingTests > 0 || displayAllTests) { _%>
+<table>
+  <thead>
+    <tr>
+      <th><%= result.testFilePath.replace(/^.*[\\\/]/, '') %></th>
+      <th></th>
+      <th></th>
+      <th><%= (result.perfStats.runtime / 1000).toFixed(3) %></th>
+      <%_ if (prioritizeFailures) { _%>
+        <th>Jump to Test</th>
+      <%_ } _%>
+    </tr>
+  </thead>
+  <tbody>
+    <%_ for(var j=0; j < result.testResults.length; j++) { _%>
+    <%_ const test = result.testResults[j]; _%>
+    <%_ if (test.status === 'failed' || displayAllTests) { _%>
+    <%_ const fixture = test.ancestorTitles.join(' / '); _%>
+    <%_ const colour = test.status === 'passed' ? 'lightgreen' : test.status === 'failed' ? 'pink' : 'lightyellow' _%>
+    <tr style="background-color: <%= colour %>; color: black" <% if (displayAllTests) { %> id="<%= (fixture + '-' + test.title).replace(/\s+/g, '-').toLowerCase() %>" <% } %>>
+      <td><strong><%= fixture %></strong></td>
+      <td><i><%= test.title %></i></td>
+      <td><%= test.status %></td>
+      <td><%= (test.duration / 1000).toFixed(3) %></td>
+      <%_ if (prioritizeFailures) { _%>
+        <td><a href="#<%= (fixture + '-' + test.title).replace(/\s+/g, '-').toLowerCase() %>">Jump to Test</a></td> <%_ } _%>
+    </tr>
+    <%_ const displayLogs = (typeof consoleLogs !== 'undefined') && consoleLogs.length > 0 && (test.consoleLogs && test.consoleLogs.length > 0); _%>
+    <%_ const displayFailureMessages = (typeof failureMessages !== 'undefined') && failureMessages && test.failureMessages && test.failureMessages.length > 0; _%>
+    <%_ if (displayLogs) { _%>
+    <tr>
+      <td colspan="<%= prioritizeFailures ? '5' : '4' %>">
+        <details>
+          <summary>Console Logs</summary>
+          <pre><%_ if (displayLogs && (test.consoleLogs && test.consoleLogs.length > 0)) { _%><%- include('logs.ejs', {logs: test.consoleLogs}) %><%_ } _%></pre>
+        </details>
+      </td>
+    </tr>
+    <%_ } _%>
+    <%_ if (displayFailureMessages) { _%>
+    <tr>
+      <td colspan="<%= prioritizeFailures ? '5' : '4' %>">
+        <details>
+          <summary>Failure Messages</summary>
+
+```diff
+<%- test.failureMessages
+.map(msg =>
+  msg
+    .replace(/\u001b\[[0-9;]*m/g, '') // Remove ANSI color codes
+    .replace(/\r\n/g, '\n')           // Normalize line endings
+    .trim()
+)
+.join('\n\n')
+%>
+```
+</details>
+      </td>
+    </tr>
+    <%_ } _%>
+    <%_ } _%>
+    <%_ } _%>
+  </tbody>
+</table>
+<%_ } _%>
+<%_ } _%>

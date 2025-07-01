@@ -1,0 +1,16 @@
+
+# <%= packageName %> Test Results
+
+> **Started**: <%= date.toUTCString(); %>
+
+<center>
+  <%- include('summary.ejs') %>
+
+  <%_ if (prioritizeFailures && numFailedTests > 0) { _%>
+  ## Failed Tests
+  <%- include('displayTests.ejs', { displayAllTests: false, prioritizeFailures: true }) %>
+  <%_ } _%>
+  <%_ if (numFailedTests === 0) { _%>
+  <p>No failed tests.</p>
+  <%_ } _%>
+</center>
