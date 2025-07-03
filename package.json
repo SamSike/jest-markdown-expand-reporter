@@ -1,6 +1,6 @@
 {
   "name": "jest-markdown-expand-reporter",
-  "version": "0.1.1-alpha",
+  "version": "0.1.2-beta",
   "description": "A markdown reporter for Jest tests with expandable sections containing per test console logs",
   "license": "MIT",
   "original-author": "Chris Shepherd",

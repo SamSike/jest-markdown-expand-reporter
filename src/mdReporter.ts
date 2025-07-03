@@ -93,7 +93,6 @@ class MDReporter {
       failureMessages: this.failureMessages,
       prioritizeFailures: this.prioritizeFailures,
       skipDisplayIfNoFailures: this.skipDisplayIfNoFailures,
-      enableAnnotations: this.enableAnnotations,
     };
   }
 
