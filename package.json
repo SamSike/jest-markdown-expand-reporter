@@ -64,5 +64,6 @@
     "jest-markdown-expand-reporter",
     "jest-markdown-expandable-reporter",
     "logging-reporter"
-  ]
+  ],
+  "packageManager": "yarn@4.10.3"
 }

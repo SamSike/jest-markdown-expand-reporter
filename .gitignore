@@ -1,6 +1,8 @@
 node_modules/
 *-lock.json
 yarn.lock
+.yarn/
+.pnp.*
 dist/
 .stryker-tmp/
 test-reports/

@@ -17,3 +17,5 @@ test-reports/
 jest.config.js
 tsconfig.json
 yarn.lock
+.yarn/
+.pnp.*
