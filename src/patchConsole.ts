@@ -33,7 +33,6 @@ beforeEach(() => {
             message: utilSafe ? utilSafe.format(...args) : args.map(String).join(' '),
             origin: stackLines,
           });
-          args.push(`\n  \x1b[90m${stackLines}\x1b[0m`);
           origConsole[method]?.apply(console, args);
         };
       } catch {

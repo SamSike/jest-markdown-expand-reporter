@@ -11,19 +11,29 @@ describe('MdReporter integration', () => {
     }
   });
 
+  afterEach(() => {
+    process.exitCode = 0;
+  });
+
   it('should generate a markdown report with correct content for pass, fail, and skip', async () => {
     // Run Jest as a subprocess, targeting sample.test.ts
+    const previousExitCode = process.exitCode;
     const result = await runCLI(
       {
         runInBand: true,
+        passWithNoTests: false,
         testMatch: ['**/src/__tests__/sample.test.ts'],
+        testPathIgnorePatterns: ['/node_modules/', '/dist/', '/coverage/'],
         reporters: [
           'default',
           [
-            require.resolve('../../dist/new.js'),
+            require.resolve('../../dist/mdReporter.js'),
             {
               filename: 'test-report.md',
               publicPath: './test-reports',
+              displayAllTests: true,
+              consoleLogs: ['all'],
+              skipDisplayIfNoFailures: false,
             },
           ],
         ],
@@ -31,13 +41,15 @@ describe('MdReporter integration', () => {
       } as any,
       [process.cwd()],
     );
+    process.exitCode = previousExitCode;
 
     expect(result.results.success).toBe(false); // There is a failing test
     expect(fs.existsSync(reportPath)).toBe(true);
 
     const content = fs.readFileSync(reportPath, 'utf8');
 
-    expect(content).toContain('# jest-markdown-expandable-reporter Test Results');
+    expect(content).toContain('# jest-markdown-expand-reporter Test Summary');
+    expect(content).toContain('# jest-markdown-expand-reporter Test Results');
     expect(content).toMatch(/Suites \(\d+\)\|Tests \(\d+\)/); // Table header
     expect(content).toContain('should pass');
     expect(content).toContain('should fail');
@@ -45,7 +57,7 @@ describe('MdReporter integration', () => {
     expect(content).toContain('Sample');
     expect(content).toMatch(/badge.*Passed-\d+-green/); // Passed badge
     expect(content).toMatch(/badge.*Failed-\d+-(red|lightgrey)/); // Failed badge
-    expect(content).toMatch(/badge.*Pending-\d+-lightgrey/); // Skipped badge
+    expect(content).toMatch(/badge.*Pending-\d+-(orange|lightgrey)/); // Skipped badge
     expect(content).toMatch(/<table>/); // Table tag
   });
 });

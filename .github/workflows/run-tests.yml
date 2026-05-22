@@ -8,9 +8,13 @@ on:
     branches: 
       - main
       - develop
+  workflow_dispatch:
+  schedule:
+    - cron: '0 5 1 * *'
 
 jobs:
   test:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v4
@@ -33,3 +37,30 @@ jobs:
 
       - name: Run tests
         run: yarn jest
+
+  monthly-dataloader-demo:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build reporter
+        run: yarn build
+
+      - name: Install demo dependencies
+        run: yarn demo:dataloader:setup
+
+      - name: Run monthly demo
+        run: yarn demo:dataloader:run
